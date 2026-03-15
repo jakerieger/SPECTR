@@ -1,0 +1,103 @@
+//
+// Created by jr on 3/13/2026.
+//
+
+#pragma once
+
+#include "PluginCommon.hpp"
+#include <juce_audio_basics/juce_audio_basics.h>
+
+namespace SPECTR::Synth {
+    // Constants shared across the wavetable system
+    namespace Wavetable {
+        static constexpr int kFrameSize    = 2048;  // samples per frame
+        static constexpr int kNumFrames    = 256;   // total frames in the table
+        static constexpr int kNumMipLevels = 10;    // mip-map levels for bandlimiting
+
+        // Each mip level removes the top half of harmonics, allowing the oscillator
+        // to pick a level appropriate for the current playback pitch and avoid aliasing.
+        static constexpr std::array kMipMaxHarmonics = {1024, 512, 256, 128, 64, 32, 16, 8, 4, 2};
+    }  // namespace Wavetable
+
+    enum class BuildMode {
+        // FFT-analyze every kFrameSize-sample window, then interpolate/stretch the
+        // results to exactly kNumFrames output frames with morphing between them.
+        FFTMorph,
+        // Slice the audio into consecutive kFrameSize-sample blocks with no
+        // interpolation between frames.  actualNumFrames = numSamples / kFrameSize.
+        // The position knob maps [0,1] -> [0, actualNumFrames).
+        Slice,
+    };
+
+    // A single wavetable frame at one mip level.
+    // Stored with one extra guard sample (= sample[0]) to allow branchless
+    // linear interpolation at the wrap boundary.
+    struct WavetableFrame {
+        // kFrameSize + 1: the extra guard sample equals sample[0] and allows
+        // branchless linear interpolation at the phase wrap boundary.
+        std::vector<float> samples;
+
+        WavetableFrame() : samples(Wavetable::kFrameSize + 1, 0.0f) {}
+
+        _Nodisc f32 getSample(const f32 phase) const noexcept {
+            // phase is [0, 1)
+            const float scaled = phase * _Cast<float>(Wavetable::kFrameSize);
+            const int idx0     = _Cast<int>(scaled);
+            const float frac   = scaled - _Cast<float>(idx0);
+            return samples[idx0] + frac * (samples[idx0 + 1] - samples[idx0]);
+        }
+    };
+
+    // Full wavetable: 256 frames × kNumMipLevels mip levels.
+    // WavetableBuilder fills this; WavetableOscillator reads from it.
+    struct WavetableData {
+        // [mipLevel][frameIndex]
+        std::vector<std::vector<WavetableFrame>> frames;
+
+        bool isLoaded {false};
+        juce::String sourceName;
+
+        int actualNumFrames {Wavetable::kNumFrames};
+        BuildMode buildMode {BuildMode::FFTMorph};
+
+        WavetableData() {
+            frames.resize(Wavetable::kNumMipLevels);
+            for (auto& mip : frames)
+                mip.resize(Wavetable::kNumFrames);
+        }
+
+        // Choose mip level so that the highest retained harmonic stays below Nyquist.
+        // We assume standard 440 Hz A4 tuning: freq = 440 * 2^((note-69)/12)
+        // At sampleRate 44100, Nyquist = 22050 Hz.
+        // maxHarmonic = floor(Nyquist / freq).  Pick the finest mip that fits.
+        static int getMipLevel(const int midiNote) noexcept {
+            // Higher note → fewer harmonics fit below Nyquist → coarser mip
+            // Derived for 44100 Hz; safe to keep slightly conservative at other rates.
+            const int maxH = _Cast<int>(22050.0 / (440.0 * std::pow(2.0, (midiNote - 69) / 12.0)));
+            for (int i = 0; i < Wavetable::kNumMipLevels; ++i)
+                if (Wavetable::kMipMaxHarmonics[i] <= maxH) { return i; }
+            return Wavetable::kNumMipLevels - 1;
+        }
+
+        // Returns the interpolated sample for a given phase, frame position, and
+        // MIDI note (used to select the appropriate mip level).
+        //
+        // framePos  - [0, kNumFrames)   – continuous, linearly interpolated
+        // phase     - [0, 1)            – oscillator phase
+        // midiNote  - 0..127            – for mip level selection
+        _Nodisc f32 getSample(const f32 framePos, const f32 phase, const int midiNote) const noexcept {
+            const int mip = getMipLevel(midiNote);
+
+            // Integer frame indices with wrap
+            const int f0   = _Cast<int>(framePos) % Wavetable::kNumFrames;
+            const int f1   = (f0 + 1) % Wavetable::kNumFrames;
+            const f32 frac = framePos - std::floor(framePos);
+
+            const f32 s0 = frames[mip][f0].getSample(phase);
+            const f32 s1 = frames[mip][f1].getSample(phase);
+
+            return s0 + frac * (s1 - s0);
+        }
+    };
+
+}  // namespace SPECTR::Synth

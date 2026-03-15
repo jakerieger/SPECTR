@@ -1,35 +1,85 @@
 #pragma once
 
+#include "PluginCommon.hpp"
+
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 
 #include "PluginProcessor.hpp"
+#include "UI/WavetableDisplay.hpp"
+#include "UI/ADSRDisplay.hpp"
 
-class MyPluginEditor final : public juce::AudioProcessorEditor {
-public:
-    explicit MyPluginEditor(MyPluginProcessor&);
-    ~MyPluginEditor() override;
+namespace SPECTR {
+    // A simple labelled knob (Slider + Label + value readout)
+    class LabelledKnob : public juce::Component {
+    public:
+        juce::Slider slider;
 
-    void paint(juce::Graphics&) override;
-    void resized() override;
-    void updatePresetName();
+        explicit LabelledKnob(const juce::String& labelText, const juce::String& suffix = "")
+            : mLabel(labelText), mSuffix(suffix) {
+            slider.setSliderStyle(juce::Slider::RotaryVerticalDrag);
+            slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+            slider.setPopupDisplayEnabled(true, true, nullptr);
+            addAndMakeVisible(slider);
+        }
 
-private:
-    void setupComponents();
-    void createAttachments();
+        void paint(juce::Graphics& g) override {
+            // Draw label below the knob
+            g.setColour(juce::Colour(0xff8b949e));
+            g.setFont(11.0f);
+            const auto lb   = getLocalBounds();
+            const int knobH = lb.getHeight() - 16;
+            g.drawText(mLabel, 0, knobH, lb.getWidth(), 14, juce::Justification::centred);
+        }
+        void resized() override {
+            const auto b    = getLocalBounds();
+            const int knobH = b.getHeight() - 16;
+            slider.setBounds(b.withHeight(knobH));
+        }
 
-    MyPluginProcessor& audioProcessor;
+    private:
+        juce::String mLabel, mSuffix;
+    };
 
-    juce::String currentPresetName_;
+    class SPECTREditor final : public juce::AudioProcessorEditor,
+                               private juce::Slider::Listener {
+    public:
+        explicit SPECTREditor(SPECTRProcessor&);
+        ~SPECTREditor() override;
 
-    // UI components
-    juce::Label gainLabel_;
-    juce::Slider gainSlider_;
+        void paint(juce::Graphics&) override;
+        void resized() override;
 
-    // Param attachments
-    // Link our gain slider value to the parameter in our PluginProcessor
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment>
-    gainAttachment_;
+    private:
+        void sliderValueChanged(juce::Slider* slider) override;
+        void openFilePicker();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MyPluginEditor)
-};
+        SPECTRProcessor& audioProcessor;
+
+        // Wavetable section
+        UI::WavetableDisplay mWavetableDisplay;
+        juce::TextButton mLoadButton {"LOAD"};
+        LabelledKnob mFramePosKnob {"POSITION"};
+
+        // ADSR section
+        UI::ADSRDisplay mAdsrDisplay;
+        LabelledKnob mAttackKnob {"ATTACK"};
+        LabelledKnob mDecayKnob {"DECAY"};
+        LabelledKnob mSustainKnob {"SUSTAIN"};
+        LabelledKnob mReleaseKnob {"RELEASE"};
+
+        // Master
+        LabelledKnob mGainKnob {"GAIN"};
+        // APVTS attachments
+        std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mAttFramePos;
+        std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mAttAttack;
+        std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mAttDecay;
+        std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mAttSustain;
+        std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mAttRelease;
+        std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mAttGain;
+
+        std::unique_ptr<juce::FileChooser> mFileChooser;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SPECTREditor)
+    };
+}  // namespace SPECTR
