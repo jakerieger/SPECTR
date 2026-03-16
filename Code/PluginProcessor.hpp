@@ -1,14 +1,13 @@
 #pragma once
 
-#include "PluginCommon.hpp"
-
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_dsp/juce_dsp.h>
 #include <juce_audio_formats/juce_audio_formats.h>
 
-#include "Synth/WavetableData.hpp"
-#include "Synth/WavetableBuilder.hpp"
-#include "Synth/Voice.hpp"
+#include "WavetableData.hpp"
+#include "WavetableBuilder.hpp"
+#include "Voice.hpp"
+#include "AnalogOscillator.hpp"
 
 namespace SPECTR {
     static constexpr int kNumVoices = 8;
@@ -68,11 +67,11 @@ namespace SPECTR {
 
         void parameterChanged(const juce::String& paramID, float newValue) override;
 
-        bool loadWavetableFromFile(const juce::File& file);
+        bool loadWavetableFromFile(const juce::File& file, BuildMode mode = BuildMode::FFTMorph);
 
         juce::AudioProcessorValueTreeState apvts;
 
-        const Synth::WavetableData& getWavetableData() const {
+        const WavetableData& getWavetableData() const {
             return mWavetableData;
         }
 
@@ -83,8 +82,8 @@ namespace SPECTR {
         void pushWavetableToVoices() const;
 
         juce::Synthesiser mSynth;
-        Synth::WavetableData mWavetableData;
-        Synth::WavetableBuilder mBuilder;
+        WavetableData mWavetableData;
+        WavetableBuilder mBuilder;
         juce::AudioFormatManager mFormatManager;
 
         std::atomic<f32> mFramePosition {0.f};

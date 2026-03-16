@@ -4,21 +4,10 @@
 
 #pragma once
 
-#include "PluginCommon.hpp"
+#include "Wavetable.hpp"
 #include <juce_audio_basics/juce_audio_basics.h>
 
-namespace SPECTR::Synth {
-    // Constants shared across the wavetable system
-    namespace Wavetable {
-        static constexpr int kFrameSize    = 2048;  // samples per frame
-        static constexpr int kNumFrames    = 256;   // total frames in the table
-        static constexpr int kNumMipLevels = 10;    // mip-map levels for bandlimiting
-
-        // Each mip level removes the top half of harmonics, allowing the oscillator
-        // to pick a level appropriate for the current playback pitch and avoid aliasing.
-        static constexpr std::array kMipMaxHarmonics = {1024, 512, 256, 128, 64, 32, 16, 8, 4, 2};
-    }  // namespace Wavetable
-
+namespace SPECTR {
     enum class BuildMode {
         // FFT-analyze every kFrameSize-sample window, then interpolate/stretch the
         // results to exactly kNumFrames output frames with morphing between them.
@@ -82,22 +71,29 @@ namespace SPECTR::Synth {
         // Returns the interpolated sample for a given phase, frame position, and
         // MIDI note (used to select the appropriate mip level).
         //
-        // framePos  - [0, kNumFrames)   – continuous, linearly interpolated
-        // phase     - [0, 1)            – oscillator phase
-        // midiNote  - 0..127            – for mip level selection
-        _Nodisc f32 getSample(const f32 framePos, const f32 phase, const int midiNote) const noexcept {
+        // normalizedPos - [0, 1)  position across actualNumFrames
+        // phase         - [0, 1)  oscillator phase
+        // midiNote      - 0..127  for mip level selection
+        _Nodisc f32 getSample(const f32 normalizedPos, const f32 phase, const int midiNote) const noexcept {
             const int mip = getMipLevel(midiNote);
+            const int N   = actualNumFrames;
 
-            // Integer frame indices with wrap
-            const int f0   = _Cast<int>(framePos) % Wavetable::kNumFrames;
-            const int f1   = (f0 + 1) % Wavetable::kNumFrames;
-            const f32 frac = framePos - std::floor(framePos);
+            if (buildMode == BuildMode::Slice) {
+                // In slice mode there is no morphing — snap to the nearest frame.
+                const int fi = std::clamp(_Cast<int>(normalizedPos * _Cast<f32>(N)), 0, N - 1);
+                return frames[mip][fi].getSample(phase);
+            }
+
+            // FFTMorph: linearly interpolate between adjacent frames.
+            const f32 framePos = normalizedPos * _Cast<f32>(N - 1);
+            const int f0       = std::clamp(_Cast<int>(framePos), 0, N - 1);
+            const int f1       = std::min(f0 + 1, N - 1);
+            const f32 frac     = framePos - _Cast<f32>(f0);
 
             const f32 s0 = frames[mip][f0].getSample(phase);
             const f32 s1 = frames[mip][f1].getSample(phase);
-
             return s0 + frac * (s1 - s0);
         }
     };
 
-}  // namespace SPECTR::Synth
+}  // namespace SPECTR

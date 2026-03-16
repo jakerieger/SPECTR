@@ -1,71 +1,12 @@
 #include "PluginEditor.hpp"
+#include "UI/LookAndFeel.hpp"
 
 namespace SPECTR {
-    // Dark GitHub-inspired theme
-    class SPECTRLookAndFeel : public juce::LookAndFeel_V4 {
-    public:
-        SPECTRLookAndFeel() {
-            setColour(juce::Slider::rotarySliderFillColourId, juce::Colour(0xff58a6ff));
-            setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colour(0xff30363d));
-            setColour(juce::Slider::thumbColourId, juce::Colour(0xff58a6ff));
-            setColour(juce::TextButton::buttonColourId, juce::Colour(0xff21262d));
-            setColour(juce::TextButton::buttonOnColourId, juce::Colour(0xff388bfd));
-            setColour(juce::TextButton::textColourOffId, juce::Colour(0xffc9d1d9));
-        }
-
-        void drawRotarySlider(juce::Graphics& g,
-                              int x,
-                              int y,
-                              int width,
-                              int height,
-                              float sliderPos,
-                              float rotaryStartAngle,
-                              float rotaryEndAngle,
-                              juce::Slider&) override {
-            const float radius  = static_cast<float>(juce::jmin(width, height)) * 0.5f - 4.0f;
-            const float centreX = static_cast<float>(x) + static_cast<float>(width) * 0.5f;
-            const float centreY = static_cast<float>(y) + static_cast<float>(height) * 0.5f;
-            const float angle   = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
-
-            // Track background
-            juce::Path track;
-            track.addCentredArc(centreX, centreY, radius, radius, 0.0f, rotaryStartAngle, rotaryEndAngle, true);
-            g.setColour(juce::Colour(0xff30363d));
-            g.strokePath(track,
-                         juce::PathStrokeType(3.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-
-            // Filled arc
-            juce::Path arc;
-            arc.addCentredArc(centreX, centreY, radius, radius, 0.0f, rotaryStartAngle, angle, true);
-            g.setColour(juce::Colour(0xff58a6ff));
-            g.strokePath(arc, juce::PathStrokeType(3.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-
-            // Thumb dot
-            const float thumbX = centreX + radius * std::cos(angle - juce::MathConstants<float>::halfPi);
-            const float thumbY = centreY + radius * std::sin(angle - juce::MathConstants<float>::halfPi);
-            g.setColour(juce::Colours::white);
-            g.fillEllipse(thumbX - 3.0f, thumbY - 3.0f, 6.0f, 6.0f);
-
-            // Centre dot
-            g.setColour(juce::Colour(0xff161b22));
-            g.fillEllipse(centreX - radius * 0.25f, centreY - radius * 0.25f, radius * 0.5f, radius * 0.5f);
-        }
-
-        void
-        drawButtonBackground(juce::Graphics& g, juce::Button& button, const juce::Colour&, bool, bool isDown) override {
-            auto bounds = button.getLocalBounds().toFloat().reduced(1.0f);
-            g.setColour(isDown ? juce::Colour(0xff388bfd) : juce::Colour(0xff21262d));
-            g.fillRoundedRectangle(bounds, 4.0f);
-            g.setColour(juce::Colour(0xff30363d));
-            g.drawRoundedRectangle(bounds, 4.0f, 1.0f);
-        }
-    };
-
-    static SPECTRLookAndFeel gLookAndFeel;
+    static UI::SPECTRLookAndFeel gLookAndFeel;
 
     SPECTREditor::SPECTREditor(SPECTRProcessor& p) : AudioProcessorEditor(&p), audioProcessor(p) {
         setLookAndFeel(&gLookAndFeel);
-        setSize(900, 580);
+        setSize(900, 620);
         setResizable(false, false);
 
         // --- Wavetable display & load button ---
@@ -75,6 +16,15 @@ namespace SPECTR {
         mLoadButton.setButtonText("LOAD WAVETABLE");
         mLoadButton.onClick = [this] { openFilePicker(); };
         addAndMakeVisible(mLoadButton);
+
+        mModeButton.setButtonText("MORPH");
+        mModeButton.setClickingTogglesState(true);
+        mModeButton.onClick = [this] {
+            const bool isSlice = mModeButton.getToggleState();
+            mBuildMode         = isSlice ? BuildMode::Slice : BuildMode::FFTMorph;
+            mModeButton.setButtonText(isSlice ? "SLICE" : "MORPH");
+        };
+        addAndMakeVisible(mModeButton);
 
         // --- Knobs ---
         addAndMakeVisible(mFramePosKnob);
@@ -125,22 +75,22 @@ namespace SPECTR {
 
     void SPECTREditor::paint(juce::Graphics& g) {
         // Background
-        g.fillAll(juce::Colour(0xff0d1117));
+        g.fillAll(UI::Colors::Background);
 
         // Section headers
         auto drawHeader = [&](juce::Rectangle<int> r, const juce::String& text) {
-            g.setColour(juce::Colour(0xff30363d));
-            g.drawHorizontalLine(r.getY() - 1, static_cast<float>(r.getX()), static_cast<float>(r.getRight()));
-            g.setColour(juce::Colour(0xff8b949e));
+            g.setColour(UI::Colors::Panel);
+            g.drawHorizontalLine(r.getY() - 1, _Cast<f32>(r.getX()), _Cast<f32>(r.getRight()));
+            g.setColour(UI::Colors::TextPrimary);
             g.setFont(juce::Font(10.0f).withStyle(juce::Font::bold));
             g.drawText(text, r.getX(), r.getY() - 18, 120, 14, juce::Justification::centredLeft);
         };
 
         // Title
-        g.setColour(juce::Colour(0xffc9d1d9));
+        g.setColour(UI::Colors::TextPrimary);
         g.setFont(juce::Font(20.0f).withStyle(juce::Font::bold));
         g.drawText("SPECTR", 20, 16, 200, 28, juce::Justification::centredLeft);
-        g.setColour(juce::Colour(0xff8b949e));
+        g.setColour(UI::Colors::TextMuted);
         g.setFont(11.0f);
         g.drawText("Wavetable Synthesizer", 88, 22, 200, 18, juce::Justification::centredLeft);
 
@@ -158,45 +108,49 @@ namespace SPECTR {
         const int oscY = 65;
         const int oscH = 230;
 
-        // Wavetable display: fills most of the OSC area
         const int knobW = 70;
+        const int kx    = w - pad - knobW;
+
+        // Wavetable display fills the OSC area (leave room for buttons at bottom)
         mWavetableDisplay.setBounds(pad, oscY, w - pad * 2 - knobW - 10, oscH - 30);
 
-        // Load button below display
+        // Load + Mode buttons side by side below the display
         mLoadButton.setBounds(pad, oscY + oscH - 26, 140, 24);
+        mModeButton.setBounds(pad + 146, oscY + oscH - 26, 72, 24);
 
-        // Frame pos knob to the right of display
-        const int kx = w - pad - knobW;
+        // Frame pos knob to the right
         mFramePosKnob.setBounds(kx, oscY + oscH / 2 - 45, knobW, 70);
+
         // --- ENVELOPE section ---
         const int envY = 315;
         const int envH = 230;
 
-        // ADSR display
+        // ADSR display fills left side
         mAdsrDisplay.setBounds(pad, envY, w - pad * 2 - knobW - 10, envH - 30);
 
-        // ADSR + Gain knobs: arranged vertically to the right
-        const int ky = envY;
-        const int kh = 68;
-        mAttackKnob.setBounds(kx, ky, knobW, kh);
-        mDecayKnob.setBounds(kx, ky + kh, knobW, kh);
-        mSustainKnob.setBounds(kx, ky + kh * 2, knobW, kh);
-        mReleaseKnob.setBounds(kx, ky + kh * 3, knobW, kh - 4);
+        // Four ADSR knobs stacked on the right
+        const int kh = 58;
+        mAttackKnob.setBounds(kx, envY, knobW, kh);
+        mDecayKnob.setBounds(kx, envY + kh, knobW, kh);
+        mSustainKnob.setBounds(kx, envY + kh * 2, knobW, kh);
+        mReleaseKnob.setBounds(kx, envY + kh * 3, knobW, kh);
+
+        // Master gain knob sits below the release knob
+        mGainKnob.setBounds(kx, envY + kh * 4, knobW, kh - 4);
     }
 
     void SPECTREditor::sliderValueChanged(juce::Slider* slider) {
         if (slider == &mFramePosKnob.slider) {
-            mWavetableDisplay.setWavetableAndFrame(&audioProcessor.getWavetableData(),
-                                                   static_cast<float>(slider->getValue()));
+            mWavetableDisplay.setWavetableAndFrame(&audioProcessor.getWavetableData(), _Cast<f32>(slider->getValue()));
             return;
         }
 
         // Any ADSR knob changed — update the display
         juce::ADSR::Parameters p;
-        p.attack  = static_cast<float>(mAttackKnob.slider.getValue());
-        p.decay   = static_cast<float>(mDecayKnob.slider.getValue());
-        p.sustain = static_cast<float>(mSustainKnob.slider.getValue());
-        p.release = static_cast<float>(mReleaseKnob.slider.getValue());
+        p.attack  = _Cast<f32>(mAttackKnob.slider.getValue());
+        p.decay   = _Cast<f32>(mDecayKnob.slider.getValue());
+        p.sustain = _Cast<f32>(mSustainKnob.slider.getValue());
+        p.release = _Cast<f32>(mReleaseKnob.slider.getValue());
         mAdsrDisplay.setParameters(p);
     }
 
@@ -213,12 +167,12 @@ namespace SPECTR {
               const auto results = fc.getResults();
               if (results.isEmpty()) return;
               const juce::File chosen = results[0];
-              const bool ok           = audioProcessor.loadWavetableFromFile(chosen);
+              const bool ok           = audioProcessor.loadWavetableFromFile(chosen, mBuildMode);
 
               if (ok) {
                   // Refresh display after successful load
                   mWavetableDisplay.setWavetableAndFrame(&audioProcessor.getWavetableData(),
-                                                         static_cast<float>(mFramePosKnob.slider.getValue()));
+                                                         _Cast<f32>(mFramePosKnob.slider.getValue()));
               } else {
                   juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
                                                          "Load Failed",

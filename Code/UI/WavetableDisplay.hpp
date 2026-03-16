@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "Synth/WavetableData.hpp"
-#include <juce_gui_basics/juce_gui_basics.h>
+#include "WavetableData.hpp"
+#include "UI/LookAndFeel.hpp"
 
 namespace SPECTR::UI {
     // Draws the waveform of the currently selected wavetable frame.
@@ -17,35 +17,35 @@ namespace SPECTR::UI {
         }
 
         // Called from the editor whenever the wavetable or position changes.
-        void setWavetableAndFrame(const Synth::WavetableData* wt, f32 normalizedPosition) {
+        void setWavetableAndFrame(const WavetableData* wt, f32 normalizedPosition) {
             mWavetable = wt;
             mPosition  = normalizedPosition;
             repaint();
         }
 
         void paint(juce::Graphics& g) override {
-            auto bounds = getLocalBounds().toFloat().reduced(2.0f);
+            const auto bounds = getLocalBounds().toFloat().reduced(2.0f);
 
             // Background
-            g.setColour(juce::Colour(0xFF0D1117));
+            g.setColour(Colors::Panel);
             g.fillRoundedRectangle(bounds, 6.0f);
 
             // Border
-            g.setColour(juce::Colour(0xFF30363D));
+            g.setColour(Colors::PanelBorder);
             g.drawRoundedRectangle(bounds, 6.0f, 1.0f);
 
             if (mWavetable == nullptr || !mWavetable->isLoaded) {
-                g.setColour(juce::Colour(0xFF484F58));
+                g.setColour(UI::Colors::TextMuted);
                 g.setFont(13.0f);
                 g.drawText("No wavetable loaded", bounds, juce::Justification::centred);
                 return;
             }
 
             // Draw the waveform of the currently selected frame
-            const int mip      = Synth::WavetableData::getMipLevel(60);  // display at mid-range
-            const f32 framePos = mPosition * _Cast<f32>(Synth::Wavetable::kNumFrames - 1);
-            const int f0       = _Cast<int>(framePos) % Synth::Wavetable::kNumFrames;
-            const int f1       = (f0 + 1) % Synth::Wavetable::kNumFrames;
+            const int mip      = WavetableData::getMipLevel(60);  // display at mid-range
+            const f32 framePos = mPosition * _Cast<f32>(Wavetable::kNumFrames - 1);
+            const int f0       = _Cast<int>(framePos) % Wavetable::kNumFrames;
+            const int f1       = (f0 + 1) % Wavetable::kNumFrames;
             const f32 frac     = framePos - std::floor(framePos);
 
             const f32 cx    = bounds.getCentreX();
@@ -74,10 +74,10 @@ namespace SPECTR::UI {
             fill.lineTo(bounds.getX(), cy);
             fill.closeSubPath();
 
-            const juce::ColourGradient grad(juce::Colour(0x4058A6FF),
+            const juce::ColourGradient grad(juce::Colour(0x404ECDC4),
                                             bounds.getX(),
                                             bounds.getY(),
-                                            juce::Colour(0x0058A6FF),
+                                            juce::Colour(0x004ECDC4),
                                             bounds.getX(),
                                             bounds.getBottom(),
                                             false);
@@ -85,20 +85,20 @@ namespace SPECTR::UI {
             g.fillPath(fill);
 
             // Waveform line
-            g.setColour(juce::Colour(0xFF58A6ff));
+            g.setColour(Colors::Teal);
             g.strokePath(wave, juce::PathStrokeType(1.5f));
 
             // Frame position indicator label
-            g.setColour(juce::Colour(0xFF8B949E));
+            g.setColour(Colors::TextPrimary);
             g.setFont(11.0f);
-            const int frameIdx = juce::roundToInt(mPosition * (Synth::Wavetable::kNumFrames - 1));
-            g.drawText("Frame " + juce::String(frameIdx),
+            const int frameIdx = juce::roundToInt(mPosition * (Wavetable::kNumFrames - 1));
+            g.drawText("Frame " + juce::String(frameIdx + 1),
                        bounds.reduced(6, 4).withHeight(14),
                        juce::Justification::topRight);
         }
 
     private:
-        const Synth::WavetableData* mWavetable {nullptr};
+        const WavetableData* mWavetable {nullptr};
         f32 mPosition {0.0f};
     };
 }  // namespace SPECTR::UI

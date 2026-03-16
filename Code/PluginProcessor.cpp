@@ -21,10 +21,10 @@ namespace SPECTR {
 
         // Add 8 voices and one sound
         for (int i = 0; i < kNumVoices; ++i) {
-            mSynth.addVoice(new Synth::Voice());
+            mSynth.addVoice(new Voice());
         }
 
-        mSynth.addSound(new Synth::WavetableSound());
+        mSynth.addSound(new WavetableSound());
 
         // Listen to all params
         for (auto* param : apvts.processor.getParameters()) {
@@ -84,7 +84,7 @@ namespace SPECTR {
         mSynth.setCurrentPlaybackSampleRate(sampleRate);
 
         for (int i = 0; i < mSynth.getNumVoices(); ++i) {
-            if (auto* v = _DCast<Synth::Voice*>(mSynth.getVoice(i))) { v->prepareToPlay(sampleRate, samplesPerBlock); }
+            if (auto* v = _DCast<Voice*>(mSynth.getVoice(i))) { v->prepareToPlay(sampleRate, samplesPerBlock); }
         }
 
         pushWavetableToVoices();
@@ -98,7 +98,7 @@ namespace SPECTR {
         // Push current frame position to all voices
         const float fp = mFramePosition.load();
         for (int i = 0; i < mSynth.getNumVoices(); ++i)
-            if (auto* v = _DCast<Synth::Voice*>(mSynth.getVoice(i))) v->setFramePosition(fp);
+            if (auto* v = _DCast<Voice*>(mSynth.getVoice(i))) v->setFramePosition(fp);
 
         mSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
@@ -163,8 +163,8 @@ namespace SPECTR {
         return JucePlugin_Name;  // Macro defined by CMakeLists.txt (PRODUCT_NAME)
     }
 
-    bool SPECTRProcessor::loadWavetableFromFile(const juce::File& file) {
-        std::unique_ptr<juce::AudioFormatReader> reader(mFormatManager.createReaderFor(file));
+    bool SPECTRProcessor::loadWavetableFromFile(const juce::File& file, const BuildMode mode) {
+        const std::unique_ptr<juce::AudioFormatReader> reader(mFormatManager.createReaderFor(file));
         if (reader == nullptr) return false;
 
         // Read up to 4 seconds of audio at the native sample rate
@@ -174,13 +174,14 @@ namespace SPECTR {
         juce::AudioBuffer<f32> audio(_Cast<int>(reader->numChannels), numSamples);
         reader->read(&audio, 0, numSamples, 0, true, true);
 
-        Synth::WavetableData newTable;
-        const bool ok = mBuilder.build(audio, newTable, file.getFileNameWithoutExtension());
+        WavetableData newTable;
+        bool ok = false;
+
+        if (mode == BuildMode::Slice) ok = mBuilder.buildSliced(audio, newTable, file.getFileNameWithoutExtension());
+        else ok = mBuilder.build(audio, newTable, file.getFileNameWithoutExtension());
 
         if (ok) {
             // Swap in on the message thread; audio thread will pick it up next block.
-            // This is safe because WavetableData is trivially copyable and the
-            // assignment is word-atomic on all supported platforms.
             mWavetableData = std::move(newTable);
             pushWavetableToVoices();
         }
@@ -190,12 +191,12 @@ namespace SPECTR {
 
     void SPECTRProcessor::updateADSR() const {
         for (int i = 0; i < mSynth.getNumVoices(); ++i)
-            if (auto* v = _DCast<Synth::Voice*>(mSynth.getVoice(i))) v->setADSR(mAdsrParams);
+            if (auto* v = _DCast<Voice*>(mSynth.getVoice(i))) v->setADSR(mAdsrParams);
     }
 
     void SPECTRProcessor::pushWavetableToVoices() const {
         for (int i = 0; i < mSynth.getNumVoices(); ++i)
-            if (auto* v = dynamic_cast<Synth::Voice*>(mSynth.getVoice(i))) v->setWavetable(&mWavetableData);
+            if (auto* v = _DCast<Voice*>(mSynth.getVoice(i))) v->setWavetable(&mWavetableData);
     }
 }  // namespace SPECTR
 

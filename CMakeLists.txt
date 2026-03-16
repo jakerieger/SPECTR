@@ -6,13 +6,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(JUCE)
 
-# Add your embedded resources here
-# juce_add_binary_data(EmbeddedResources
-#     SOURCES
-#     # sources...
-#     HEADER_NAME BinaryData.h
-#     NAMESPACE BinaryData
-# )
+juce_add_binary_data(EmbeddedResources
+        SOURCES
+        Resources/index.html
+
+        HEADER_NAME BinaryData.h
+        NAMESPACE BinaryData
+)
 
 juce_add_plugin(SPECTR
         COMPANY_NAME "Rieger DSP"
@@ -34,14 +34,26 @@ juce_add_plugin(SPECTR
 )
 
 target_sources(SPECTR PRIVATE
+        Code/AnalogOscillator.hpp
+        Code/PluginCommon.hpp
         Code/PluginEditor.cpp
+        Code/PluginEditor.hpp
         Code/PluginProcessor.cpp
-        Code/Synth/WavetableBuilder.cpp
+        Code/PluginProcessor.hpp
+        Code/UI/ADSRDisplay.hpp
+        Code/UI/LookAndFeel.hpp
+        Code/UI/WavetableDisplay.hpp
+        Code/Voice.hpp
+        Code/Wavetable.hpp
+        Code/WavetableBuilder.cpp
+        Code/WavetableBuilder.hpp
+        Code/WavetableData.hpp
+        Code/WavetableOscillator.hpp
 )
 
 # Add any JUCE modules your plugin needs here. Un-comment the EmbeddedResources if you're using it.
 target_link_libraries(SPECTR PRIVATE
-        #    EmbeddedResources
+        EmbeddedResources
         juce::juce_audio_processors
         juce::juce_audio_utils
         juce::juce_dsp

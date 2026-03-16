@@ -6,7 +6,7 @@
 
 #include "WavetableData.hpp"
 
-namespace SPECTR::Synth {
+namespace SPECTR {
     // WavetableOscillator
     //
     // A single oscillator that reads from a WavetableData at a given pitch and
@@ -33,8 +33,9 @@ namespace SPECTR::Synth {
         }
 
         // Update wavetable position (from the scrub knob, 0..1 normalized).
+        // Stored as-is; WavetableData::getSample interprets it relative to actualNumFrames.
         void setFramePosition(const f32 normalizedPos) {
-            mFramePosition = normalizedPos * _Cast<f32>(Wavetable::kNumFrames - 1);
+            mFramePosition = normalizedPos;
         }
 
         // Render `numSamples` into `output`, adding to existing content.
@@ -56,11 +57,11 @@ namespace SPECTR::Synth {
             mPhase = phase;
         }
 
-        int getMidiNote() const noexcept {
+        _Nodisc int getMidiNote() const noexcept {
             return mMidiNote;
         }
 
-        f32 getPhase() const noexcept {
+        _Nodisc f32 getPhase() const noexcept {
             return mPhase;
         }
 
@@ -78,4 +79,4 @@ namespace SPECTR::Synth {
         f32 mVelocity {1.0f};
         int mMidiNote {60};
     };
-}  // namespace SPECTR::Synth
+}  // namespace SPECTR

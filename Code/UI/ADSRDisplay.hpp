@@ -5,7 +5,7 @@
 #pragma once
 
 #include "PluginCommon.hpp"
-#include <juce_gui_basics/juce_gui_basics.h>
+#include "UI/LookAndFeel.hpp"
 #include <juce_audio_basics/juce_audio_basics.h>
 
 namespace SPECTR::UI {
@@ -23,15 +23,15 @@ namespace SPECTR::UI {
         }
 
         void paint(juce::Graphics& g) override {
-            auto bounds = getLocalBounds().toFloat().reduced(2.0f);
+            const auto bounds = getLocalBounds().toFloat().reduced(2.0f);
 
-            g.setColour(juce::Colour(0xff0d1117));
+            g.setColour(Colors::Panel);
             g.fillRoundedRectangle(bounds, 6.0f);
 
-            g.setColour(juce::Colour(0xff30363d));
+            g.setColour(Colors::PanelBorder);
             g.drawRoundedRectangle(bounds, 6.0f, 1.0f);
 
-            const f32 padX = 10.0f, padY = 10.0f;
+            constexpr f32 padX = 10.0f, padY = 10.0f;
             const f32 w  = bounds.getWidth() - padX * 2.0f;
             const f32 h  = bounds.getHeight() - padY * 2.0f;
             const f32 bx = bounds.getX() + padX;
@@ -39,7 +39,7 @@ namespace SPECTR::UI {
 
             // --- Compute proportional segment widths ---
             // Use log scale on time segments so short values are visible
-            auto logTime = [](f32 t) { return std::log1p(t * 20.0f); };
+            auto logTime = [](const f32 t) { return std::log1p(t * 20.0f); };
 
             const f32 tA   = logTime(mParams.attack);
             const f32 tD   = logTime(mParams.decay);
@@ -70,19 +70,19 @@ namespace SPECTR::UI {
             fill.lineTo(bx, yBot);
             fill.closeSubPath();
 
-            juce::ColourGradient
-              fillGrad(juce::Colour(0x4034d058), bx, yTop, juce::Colour(0x0034d058), bx, yBot, false);
+            const juce::ColourGradient
+              fillGrad(juce::Colour(0x404ECDC4), bx, yTop, juce::Colour(0x004ECDC4), bx, yBot, false);
             g.setGradientFill(fillGrad);
             g.fillPath(fill);
 
             // Stroke
-            g.setColour(juce::Colour(0xff3fb950));
+            g.setColour(Colors::Teal);
             g.strokePath(env, juce::PathStrokeType(1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
 
             // Segment labels
             g.setFont(10.0f);
-            g.setColour(juce::Colour(0xff8b949e));
-            auto label = [&](f32 x, const juce::String& text) {
+            g.setColour(Colors::TextPrimary);
+            auto label = [&](const f32 x, const juce::String& text) {
                 g.drawText(text, _Cast<int>(x) - 12, _Cast<int>(yBot) + 1, 24, 12, juce::Justification::centred);
             };
             label(bx + (xA - bx) * 0.5f, "A");

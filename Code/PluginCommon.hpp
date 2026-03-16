@@ -16,8 +16,17 @@
 #define _Nodisc [[nodiscard]]
 #define _Unused(x) (void)(x)
 #define _SmallFloat 1e-6f
+#define _Sqrt8 2.828427f
 
+// Root namespace
 namespace SPECTR {
+    namespace Wavetable {}
+    class AnalogOscillator;
+    class WavetableBuilder;
+    class WavetableOscillator;
+
+    namespace UI {}
+
     using u8   = uint8_t;
     using u16  = uint16_t;
     using u32  = uint32_t;

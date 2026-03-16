@@ -4,7 +4,7 @@
 
 #include "WavetableBuilder.hpp"
 
-namespace SPECTR::Synth {
+namespace SPECTR {
     WavetableBuilder::WavetableBuilder() = default;
 
     bool WavetableBuilder::build(const juce::AudioBuffer<f32>& audio,
@@ -68,8 +68,101 @@ namespace SPECTR::Synth {
                 synthesizeFrame(outFrameBins[_Cast<size_t>(f)], maxH, outTable.frames[mip][f]);
         }
 
-        outTable.isLoaded   = true;
-        outTable.sourceName = sourceName;
+        outTable.isLoaded        = true;
+        outTable.sourceName      = sourceName;
+        outTable.actualNumFrames = Wavetable::kNumFrames;
+        outTable.buildMode       = BuildMode::FFTMorph;
+
+        return true;
+    }
+
+    bool WavetableBuilder::buildSliced(const juce::AudioBuffer<f32>& audio,
+                                       WavetableData& outTable,
+                                       const juce::String& sourceName) {
+        ensureFFT();
+
+        // Mix to mono
+        const int numChannels = audio.getNumChannels();
+        const int numSamples  = audio.getNumSamples();
+
+        if (numSamples < kFFTSize) return false;
+
+        std::vector<f32> mono(_Cast<size_t>(numSamples), 0.0f);
+        for (int ch = 0; ch < numChannels; ++ch) {
+            const f32* src = audio.getReadPointer(ch);
+            for (int i = 0; i < numSamples; ++i)
+                mono[_Cast<size_t>(i)] += src[i];
+        }
+        if (numChannels > 1)
+            for (auto& s : mono)
+                s /= _Cast<f32>(numChannels);
+
+        // Check for silence
+        const f32 peak =
+          *std::ranges::max_element(mono, [](const f32 a, const f32 b) { return std::abs(a) < std::abs(b); });
+        if (std::abs(peak) < _SmallFloat) return false;
+
+        // How many complete kFFTSize blocks fit in the full buffer?
+        const int totalSlices = numSamples / kFFTSize;
+        if (totalSlices == 0) return false;
+
+        // Trim silence: compute peak per slice, then drop leading and trailing
+        // slices whose peak is below 1% of the overall file peak.
+        // This prevents a 4-frame file from producing 252 silent ghost frames.
+        const f32 silenceThreshold = std::abs(peak) * 0.01f;
+
+        int firstSlice = 0;
+        int lastSlice  = totalSlices - 1;  // inclusive
+
+        for (int i = 0; i < totalSlices; ++i) {
+            const f32* block = mono.data() + _Cast<size_t>(i) * kFFTSize;
+            f32 blockPeak    = 0.0f;
+            for (int s = 0; s < kFFTSize; ++s)
+                blockPeak = std::max(blockPeak, std::abs(block[s]));
+            if (blockPeak >= silenceThreshold) {
+                firstSlice = i;
+                break;
+            }
+        }
+
+        for (int i = totalSlices - 1; i >= firstSlice; --i) {
+            const f32* block = mono.data() + _Cast<size_t>(i) * kFFTSize;
+            f32 blockPeak    = 0.0f;
+            for (int s = 0; s < kFFTSize; ++s)
+                blockPeak = std::max(blockPeak, std::abs(block[s]));
+            if (blockPeak >= silenceThreshold) {
+                lastSlice = i;
+                break;
+            }
+        }
+
+        const int numSlices = std::min(lastSlice - firstSlice + 1, Wavetable::kNumFrames);
+        if (numSlices == 0) return false;
+
+        // FFT-analyse each trimmed slice (same pipeline as FFTMorph, but no stretching).
+        std::vector<std::vector<std::complex<f32>>> sliceBins(_Cast<size_t>(numSlices));
+        for (int i = 0; i < numSlices; ++i)
+            analyzeCycle(mono.data() + _Cast<size_t>(firstSlice + i) * kFFTSize, sliceBins[_Cast<size_t>(i)]);
+
+        // DC removal + phase alignment to slice 0
+        const auto& ref = sliceBins[0];
+        for (auto& bins : sliceBins) {
+            removeDC(bins);
+            alignPhase(bins, ref);
+        }
+
+        // Synthesize mip levels for each slice.
+        // Frames beyond numSlices are left as the default (silent) WavetableFrame.
+        for (int mip = 0; mip < Wavetable::kNumMipLevels; ++mip) {
+            const int maxH = Wavetable::kMipMaxHarmonics[mip];
+            for (int f = 0; f < numSlices; ++f)
+                synthesizeFrame(sliceBins[_Cast<size_t>(f)], maxH, outTable.frames[mip][f]);
+        }
+
+        outTable.isLoaded        = true;
+        outTable.sourceName      = sourceName;
+        outTable.actualNumFrames = numSlices;
+        outTable.buildMode       = BuildMode::Slice;
 
         return true;
     }
@@ -167,7 +260,7 @@ namespace SPECTR::Synth {
 
         fft->performRealOnlyInverseTransform(ifftBuffer.data());
 
-        // Output is in the first half [0 .. kFFTSize-1] — read sequentially, not at [i*2]
+        // Output is in the first half [0..kFFTSize-1] — read sequentially, not at [i*2]
         float peak = 0.0f;
         for (int i = 0; i < kFFTSize; ++i)
             peak = std::max(peak, std::abs(ifftBuffer[_Cast<size_t>(i)]));
@@ -190,4 +283,4 @@ namespace SPECTR::Synth {
             for (f32& s : buf)
                 s /= peak;
     }
-}  // namespace SPECTR::Synth
+}  // namespace SPECTR

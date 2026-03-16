@@ -1,7 +1,5 @@
 #pragma once
 
-#include "PluginCommon.hpp"
-
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_processors/juce_audio_processors.h>
 
@@ -59,6 +57,7 @@ namespace SPECTR {
         // Wavetable section
         UI::WavetableDisplay mWavetableDisplay;
         juce::TextButton mLoadButton {"LOAD"};
+        juce::TextButton mModeButton {"MORPH"};  // toggles between FFTMorph and Slice
         LabelledKnob mFramePosKnob {"POSITION"};
 
         // ADSR section
@@ -79,6 +78,7 @@ namespace SPECTR {
         std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mAttGain;
 
         std::unique_ptr<juce::FileChooser> mFileChooser;
+        BuildMode mBuildMode {BuildMode::FFTMorph};  // current mode for next load
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SPECTREditor)
     };

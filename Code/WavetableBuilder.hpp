@@ -7,24 +7,37 @@
 #include "WavetableData.hpp"
 #include <juce_dsp/juce_dsp.h>
 
-namespace SPECTR::Synth {
+namespace SPECTR {
     // Converts a raw audio buffer into a fully populated WavetableData struct.
     //
-    // Pipeline:
-    //   1. Detect cycles in the audio via zero-crossing analysis
-    //   2. For each detected cycle: FFT → extract complex harmonics
-    //   3. Map/interpolate cycles onto exactly kNumFrames output frames
-    //   4. For each frame: DC removal, phase alignment to frame 0
-    //   5. Synthesize each mip level by zeroing harmonics above its cutoff
-    //   6. Fill the WavetableFrame sample arrays (with guard sample)
+    // Two modes are available (see BuildMode in WavetableData.hpp):
+    //
+    // FFTMorph (default):
+    //   1. Slice audio into kFrameSize windows
+    //   2. FFT each window to extract complex harmonics
+    //   3. Interpolate/stretch to exactly kNumFrames output frames
+    //   4. DC removal + phase alignment to frame 0
+    //   5. Synthesize each mip level (zero harmonics above cutoff)
+    //   6. Fill WavetableFrame sample arrays (with guard sample)
+    //
+    // Slice:
+    //   1. Slice audio into consecutive kFrameSize blocks (no overlap)
+    //   2. Build mip levels directly from the time-domain samples
+    //      (low-pass filter via harmonic truncation using the FFT pipeline)
+    //   3. actualNumFrames = numSamples / kFrameSize  (no stretching to 256)
     class WavetableBuilder {
     public:
         WavetableBuilder();
 
-        // Main entry point. Audio must be mono; sampleRate is used only for
-        // informational purposes (harmonic counts are sample-index based).
+        // FFTMorph build: analyzes audio and stretches to kNumFrames frames with
+        // smooth morphing between them.
         // Returns true on success, false if audio is too short or silent.
         bool build(const juce::AudioBuffer<f32>& audio, WavetableData& outTable, const juce::String& sourceName);
+
+        // Slice build: cuts audio into consecutive kFrameSize blocks.
+        // actualNumFrames = numSamples / kFrameSize; no interpolation between frames.
+        // Returns true on success, false if audio is too short or silent.
+        bool buildSliced(const juce::AudioBuffer<f32>& audio, WavetableData& outTable, const juce::String& sourceName);
 
     private:
         //--- FFT analysis of one window -------------------------------------------
@@ -56,4 +69,4 @@ namespace SPECTR::Synth {
             if (fft == nullptr) fft = std::make_unique<juce::dsp::FFT>(11);  // 2^11 = kFFTSize
         }
     };
-}  // namespace SPECTR::Synth
+}  // namespace SPECTR

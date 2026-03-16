@@ -1,0 +1,797 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600&display=swap');
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0
+  }
+
+  body {
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .synth {
+    background: #0e0e0f;
+    font-family: 'Rajdhani', sans-serif;
+    padding: 20px;
+    color: #c8c8c8;
+    width: 1200px;
+    height: 700px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden
+  }
+
+  .synth-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #222;
+    flex-shrink: 0
+  }
+
+  .synth-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px;
+    letter-spacing: 5px;
+    color: #e0e0e0;
+    text-transform: uppercase
+  }
+
+  .led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #1a1a1a;
+    display: inline-block;
+    margin-left: 6px
+  }
+
+  .led.on {
+    background: #ff4d4d
+  }
+
+  .panel-row {
+    display: grid;
+    gap: 12px;
+    flex: 1;
+    min-height: 0
+  }
+
+  .row-3 {
+    grid-template-columns: 1fr 1fr 1fr
+  }
+
+  .row-4 {
+    grid-template-columns: 1.1fr 1.2fr 1fr 1fr
+  }
+
+  .top-row {
+    flex: 0 0 auto;
+    margin-bottom: 12px
+  }
+
+  .bottom-row {
+    flex: 1;
+    min-height: 0
+  }
+
+  .panel {
+    background: #161618;
+    border: 1px solid #2a2a2e;
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column
+  }
+
+  .panel-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: #555;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0
+  }
+
+  .tag {
+    font-size: 8px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    letter-spacing: 1px
+  }
+
+  .analog-tag {
+    background: #2a1a0a;
+    color: #d4702a;
+    border: 1px solid #4a2a0a
+  }
+
+  .wt-tag {
+    background: #0a1a2a;
+    color: #4a9fd4;
+    border: 1px solid #0a2a4a
+  }
+
+  .knob-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-end;
+    flex-wrap: wrap
+  }
+
+  .knob-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px
+  }
+
+  .knob-label {
+    font-size: 9px;
+    color: #555;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: center
+  }
+
+  .knob-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: #888
+  }
+
+  .knob {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #222226;
+    border: 1px solid #333;
+    position: relative;
+    cursor: pointer;
+    user-select: none
+  }
+
+  .knob.sm {
+    width: 28px;
+    height: 28px
+  }
+
+  .knob::after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 11px;
+    background: #d4702a;
+    border-radius: 1px;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    transform-origin: bottom center
+  }
+
+  .knob.sm::after {
+    height: 7px;
+    top: 3px
+  }
+
+  .knob.blue::after {
+    background: #4a9fd4
+  }
+
+  .knob.green::after {
+    background: #4ad4a0
+  }
+
+  .knob.amber::after {
+    background: #d4b04a
+  }
+
+  .knob.purple::after {
+    background: #a04ad4
+  }
+
+  .seg-control {
+    display: flex;
+    background: #0e0e10;
+    border-radius: 5px;
+    border: 1px solid #2a2a2e;
+    overflow: hidden
+  }
+
+  .seg-btn {
+    font-size: 9px;
+    padding: 3px 8px;
+    cursor: pointer;
+    color: #555;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: none;
+    background: transparent;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500;
+    transition: all 0.15s
+  }
+
+  .seg-btn.active {
+    background: #2a1a0a;
+    color: #d4702a
+  }
+
+  .seg-btn.active.blue {
+    background: #0a1a2a;
+    color: #4a9fd4
+  }
+
+  .seg-btn.active.green {
+    background: #0a2a1a;
+    color: #4ad4a0
+  }
+
+  .seg-btn.active.amber {
+    background: #1a1000;
+    color: #d4b04a
+  }
+
+  .seg-btn.active.purple {
+    background: #1a0a2a;
+    color: #a04ad4
+  }
+
+  .waveform-display {
+    width: 100%;
+    height: 36px;
+    background: #0a0a0c;
+    border-radius: 4px;
+    border: 1px solid #222;
+    overflow: hidden;
+    flex-shrink: 0
+  }
+
+  .env-display {
+    width: 100%;
+    height: 60px;
+    background: #0a0a0c;
+    border-radius: 4px;
+    border: 1px solid #222;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin-bottom: 10px
+  }
+
+  .filter-display {
+    width: 100%;
+    height: 50px;
+    background: #0a0a0c;
+    border-radius: 4px;
+    border: 1px solid #222;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin-bottom: 10px
+  }
+
+  .section-sep {
+    height: 1px;
+    background: #222;
+    margin: 8px 0
+  }
+
+  .slider-v {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 80px;
+    width: 4px;
+    background: #222;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    writing-mode: vertical-lr
+  }
+
+  .slider-v::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 8px;
+    background: #a04ad4;
+    border-radius: 2px;
+    cursor: pointer
+  }
+
+  .mini-toggle {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    margin-top: 6px
+  }
+
+  .toggle-track {
+    width: 24px;
+    height: 12px;
+    background: #222;
+    border-radius: 6px;
+    position: relative;
+    border: 1px solid #333;
+    flex-shrink: 0
+  }
+
+  .toggle-thumb {
+    width: 8px;
+    height: 8px;
+    background: #555;
+    border-radius: 50%;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    transition: all 0.15s
+  }
+
+  .toggle-track.on {
+    background: #1a2a1a;
+    border-color: #4ad4a0
+  }
+
+  .toggle-track.on .toggle-thumb {
+    background: #4ad4a0;
+    left: 13px
+  }
+
+  .toggle-label {
+    font-size: 9px;
+    color: #555;
+    letter-spacing: 1px;
+    text-transform: uppercase
+  }
+
+  .lfo-shape-btn {
+    width: 28px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 3px;
+    border: 1px solid #2a2a2e;
+    background: #0e0e10
+  }
+
+  .lfo-shape-btn.active {
+    background: #1a0a2a;
+    border-color: #6a2ad4
+  }
+
+  .lfo-shapes {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 10px;
+    flex-shrink: 0
+  }
+
+  .lfo-dest {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: auto
+  }
+
+  .dest-pill {
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: #1a1a1e;
+    border: 1px solid #2a2a2e;
+    color: #555;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase
+  }
+
+  .dest-pill.active {
+    background: #1a0a2a;
+    border-color: #6a2ad4;
+    color: #b04ad4
+  }
+</style>
+
+<div class="synth">
+  <div class="synth-header">
+    <div style="display:flex;align-items:baseline;gap:12px">
+      <div class="synth-name">SPECTR</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#333;letter-spacing:3px">POLYPHONIC
+        SYNTHESIZER</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div style="font-size:9px;color:#444;letter-spacing:2px">VOICE</div>
+      <div class="seg-control">
+        <button class="seg-btn active"
+          onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">MONO</button>
+        <button class="seg-btn"
+          onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">POLY</button>
+        <button class="seg-btn"
+          onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">UNI</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px">
+        <div class="led on"></div>
+        <div style="font-size:9px;color:#444;letter-spacing:1px">PWR</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OSC ROW -->
+  <div class="panel-row row-3 top-row" style="height:270px">
+    <!-- OSC 1 ANALOG -->
+    <div class="panel">
+      <div class="panel-title">OSC 1 <span class="tag analog-tag">ANALOG</span></div>
+      <svg class="waveform-display" viewBox="0 0 200 36" preserveAspectRatio="none">
+        <polyline points="0,18 25,18 25,4 50,32 75,4 100,32 125,4 150,32 175,4 200,18" fill="none" stroke="#d4702a"
+          stroke-width="1.5" />
+      </svg>
+      <div class="seg-control" style="margin-top:8px;margin-bottom:0">
+        <button class="seg-btn active"
+          onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">SAW</button>
+        <button class="seg-btn"
+          onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">SQR</button>
+        <button class="seg-btn"
+          onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">TRI</button>
+        <button class="seg-btn"
+          onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">SIN</button>
+      </div>
+      <div class="section-sep"></div>
+      <div class="knob-row">
+        <div class="knob-group">
+          <div class="knob" style="transform:rotate(0deg)"></div>
+          <div class="knob-label">TUNE</div>
+          <div class="knob-val">+0st</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob" style="transform:rotate(40deg)"></div>
+          <div class="knob-label">FINE</div>
+          <div class="knob-val">+0ct</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob" style="transform:rotate(-20deg)"></div>
+          <div class="knob-label">P.WIDTH</div>
+          <div class="knob-val">50%</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob" style="transform:rotate(60deg)"></div>
+          <div class="knob-label">LEVEL</div>
+          <div class="knob-val">80%</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:8px">
+        <div class="mini-toggle" onclick="let t=this.querySelector('.toggle-track');t.classList.toggle('on')">
+          <div class="toggle-track on">
+            <div class="toggle-thumb"></div>
+          </div>
+          <div class="toggle-label">SYNC</div>
+        </div>
+        <div class="mini-toggle" onclick="let t=this.querySelector('.toggle-track');t.classList.toggle('on')">
+          <div class="toggle-track">
+            <div class="toggle-thumb"></div>
+          </div>
+          <div class="toggle-label">RING MOD</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OSC 2 WAVETABLE -->
+    <div class="panel">
+      <div class="panel-title">OSC 2 <span class="tag wt-tag">WAVETABLE</span></div>
+      <svg class="waveform-display" viewBox="0 0 200 36" preserveAspectRatio="none">
+        <path
+          d="M0,18 Q12,4 25,18 Q38,32 50,18 Q62,4 75,18 Q88,32 100,18 Q112,4 125,18 Q138,32 150,18 Q162,4 175,18 Q188,32 200,18"
+          fill="none" stroke="#4a9fd4" stroke-width="1.5" />
+        <defs>
+          <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#4a9fd4" stop-opacity="0.15" />
+            <stop offset="1" stop-color="#4a9fd4" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M0,18 Q12,4 25,18 Q38,32 50,18 Q62,4 75,18 Q88,32 100,18 Q112,4 125,18 Q138,32 150,18 Q162,4 175,18 Q188,32 200,18 L200,36 L0,36Z"
+          fill="url(#g2)" />
+      </svg>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;margin-bottom:0">
+        <div style="font-size:9px;color:#444;letter-spacing:1px">TABLE BANK</div>
+        <div class="seg-control">
+          <button class="seg-btn active blue"
+            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','blue')});this.classList.add('active','blue')">BASIC</button>
+          <button class="seg-btn"
+            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','blue')});this.classList.add('active','blue')">PWR</button>
+          <button class="seg-btn"
+            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','blue')});this.classList.add('active','blue')">VOCAL</button>
+          <button class="seg-btn"
+            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','blue')});this.classList.add('active','blue')">XTND</button>
+        </div>
+      </div>
+      <div class="section-sep"></div>
+      <div class="knob-row">
+        <div class="knob-group">
+          <div class="knob blue" style="transform:rotate(30deg)"></div>
+          <div class="knob-label">TUNE</div>
+          <div class="knob-val">+0st</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob blue" style="transform:rotate(-10deg)"></div>
+          <div class="knob-label">POSITION</div>
+          <div class="knob-val">42%</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob blue" style="transform:rotate(50deg)"></div>
+          <div class="knob-label">WARP</div>
+          <div class="knob-val">20%</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob blue" style="transform:rotate(70deg)"></div>
+          <div class="knob-label">LEVEL</div>
+          <div class="knob-val">60%</div>
+        </div>
+      </div>
+      <div class="mini-toggle" onclick="let t=this.querySelector('.toggle-track');t.classList.toggle('on')">
+        <div class="toggle-track">
+          <div class="toggle-thumb"></div>
+        </div>
+        <div class="toggle-label">PHASE RESET</div>
+      </div>
+    </div>
+
+    <!-- OSC 3 WAVETABLE -->
+    <div class="panel">
+      <div class="panel-title">OSC 3 <span class="tag wt-tag">WAVETABLE</span></div>
+      <svg class="waveform-display" viewBox="0 0 200 36" preserveAspectRatio="none">
+        <path d="M0,18 L22,4 L22,32 L44,4 L44,32 L66,18 L88,4 L110,32 L132,18 L154,4 L176,32 L200,18" fill="none"
+          stroke="#4ad4a0" stroke-width="1.5" />
+        <defs>
+          <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#4ad4a0" stop-opacity="0.12" />
+            <stop offset="1" stop-color="#4ad4a0" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;margin-bottom:0">
+        <div style="font-size:9px;color:#444;letter-spacing:1px">TABLE BANK</div>
+        <div class="seg-control">
+          <button class="seg-btn active green"
+            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','green')});this.classList.add('active','green')">HARM</button>
+          <button class="seg-btn"
+            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','green')});this.classList.add('active','green')">FMTD</button>
+          <button class="seg-btn"
+            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','green')});this.classList.add('active','green')">PAD</button>
+          <button class="seg-btn"
+            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','green')});this.classList.add('active','green')">XTND</button>
+        </div>
+      </div>
+      <div class="section-sep"></div>
+      <div class="knob-row">
+        <div class="knob-group">
+          <div class="knob green" style="transform:rotate(-30deg)"></div>
+          <div class="knob-label">TUNE</div>
+          <div class="knob-val">-12st</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob green" style="transform:rotate(20deg)"></div>
+          <div class="knob-label">POSITION</div>
+          <div class="knob-val">65%</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob green" style="transform:rotate(-40deg)"></div>
+          <div class="knob-label">WARP</div>
+          <div class="knob-val">8%</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob green" style="transform:rotate(45deg)"></div>
+          <div class="knob-label">LEVEL</div>
+          <div class="knob-val">45%</div>
+        </div>
+      </div>
+      <div class="mini-toggle" onclick="let t=this.querySelector('.toggle-track');t.classList.toggle('on')">
+        <div class="toggle-track on">
+          <div class="toggle-thumb"></div>
+        </div>
+        <div class="toggle-label">PHASE RESET</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM ROW: FILTER + ENVELOPE + LFO -->
+  <div class="panel-row row-3 bottom-row">
+    <!-- FILTER -->
+    <div class="panel">
+      <div class="panel-title">FILTER</div>
+      <svg class="filter-display" viewBox="0 0 260 50" preserveAspectRatio="none">
+        <path d="M0,42 L70,42 Q100,42 118,24 Q130,8 142,12 L158,14 L260,14" fill="none" stroke="#d4b04a"
+          stroke-width="1.5" />
+        <defs>
+          <linearGradient id="gf" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#d4b04a" stop-opacity="0.12" />
+            <stop offset="1" stop-color="#d4b04a" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <path d="M0,42 L70,42 Q100,42 118,24 Q130,8 142,12 L158,14 L260,14 L260,50 L0,50Z" fill="url(#gf)" />
+      </svg>
+      <div class="seg-control" style="margin-bottom:10px">
+        <button class="seg-btn active amber"
+          onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active','amber')">LP
+          12</button>
+        <button class="seg-btn"
+          onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','amber')});this.classList.add('active','amber')">LP
+          24</button>
+        <button class="seg-btn"
+          onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','amber')});this.classList.add('active','amber')">HP</button>
+        <button class="seg-btn"
+          onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','amber')});this.classList.add('active','amber')">BP</button>
+        <button class="seg-btn"
+          onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','amber')});this.classList.add('active','amber')">NOTCH</button>
+      </div>
+      <div class="knob-row">
+        <div class="knob-group">
+          <div class="knob amber" style="transform:rotate(60deg)"></div>
+          <div class="knob-label">CUTOFF</div>
+          <div class="knob-val">3.2kHz</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob amber" style="transform:rotate(-30deg)"></div>
+          <div class="knob-label">RESONANCE</div>
+          <div class="knob-val">25%</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob sm amber" style="transform:rotate(20deg)"></div>
+          <div class="knob-label">ENV AMT</div>
+          <div class="knob-val">+40%</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob sm amber" style="transform:rotate(-50deg)"></div>
+          <div class="knob-label">KEY TRK</div>
+          <div class="knob-val">50%</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob sm amber" style="transform:rotate(35deg)"></div>
+          <div class="knob-label">DRIVE</div>
+          <div class="knob-val">12%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENVELOPE -->
+    <div class="panel">
+      <div class="panel-title">ENVELOPE</div>
+      <svg class="env-display" viewBox="0 0 260 60" preserveAspectRatio="none">
+        <path d="M8,54 L35,6 L60,26 L110,26 L135,54 L252,54" fill="none" stroke="#a04ad4" stroke-width="1.5" />
+        <defs>
+          <linearGradient id="ge" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#a04ad4" stop-opacity="0.15" />
+            <stop offset="1" stop-color="#a04ad4" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <path d="M8,54 L35,6 L60,26 L110,26 L135,54 L252,54 L252,60 L8,60Z" fill="url(#ge)" />
+        <circle cx="35" cy="6" r="3" fill="#a04ad4" />
+        <circle cx="60" cy="26" r="3" fill="#a04ad4" />
+        <circle cx="110" cy="26" r="3" fill="#a04ad4" />
+        <circle cx="135" cy="54" r="3" fill="#a04ad4" />
+        <line x1="35" y1="6" x2="35" y2="54" stroke="#a04ad4" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.3" />
+        <line x1="60" y1="26" x2="60" y2="54" stroke="#a04ad4" stroke-width="0.5" stroke-dasharray="3,3"
+          opacity="0.3" />
+        <line x1="110" y1="26" x2="110" y2="54" stroke="#a04ad4" stroke-width="0.5" stroke-dasharray="3,3"
+          opacity="0.3" />
+        <line x1="135" y1="54" x2="135" y2="54" stroke="#a04ad4" stroke-width="0.5" stroke-dasharray="3,3"
+          opacity="0.3" />
+        <text x="28" y="58" font-size="7" fill="#554" font-family="monospace" opacity="0.7">A</text>
+        <text x="55" y="58" font-size="7" fill="#554" font-family="monospace" opacity="0.7">D</text>
+        <text x="105" y="58" font-size="7" fill="#554" font-family="monospace" opacity="0.7">S</text>
+        <text x="130" y="58" font-size="7" fill="#554" font-family="monospace" opacity="0.7">R</text>
+      </svg>
+      <div style="display:flex;gap:20px;justify-content:center;margin-top:4px">
+        <div class="knob-group">
+          <input class="slider-v" type="range" min="0" max="100" value="18" style="height:80px" />
+          <div class="knob-label">ATTACK</div>
+          <div class="knob-val">20ms</div>
+        </div>
+        <div class="knob-group">
+          <input class="slider-v" type="range" min="0" max="100" value="55" style="height:80px" />
+          <div class="knob-label">DECAY</div>
+          <div class="knob-val">180ms</div>
+        </div>
+        <div class="knob-group">
+          <input class="slider-v" type="range" min="0" max="100" value="65" style="height:80px" />
+          <div class="knob-label">SUSTAIN</div>
+          <div class="knob-val">65%</div>
+        </div>
+        <div class="knob-group">
+          <input class="slider-v" type="range" min="0" max="100" value="40" style="height:80px" />
+          <div class="knob-label">RELEASE</div>
+          <div class="knob-val">400ms</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LFO -->
+    <div class="panel">
+      <div class="panel-title">LFO</div>
+      <div class="lfo-shapes">
+        <div class="lfo-shape-btn active" title="Sine"
+          onclick="document.querySelectorAll('.lfo-shape-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">
+          <svg width="18" height="16" viewBox="0 0 18 16">
+            <path d="M1,8 Q4.5,1 9,8 Q13.5,15 17,8" fill="none" stroke="#a04ad4" stroke-width="1.3" />
+          </svg>
+        </div>
+        <div class="lfo-shape-btn" title="Triangle"
+          onclick="document.querySelectorAll('.lfo-shape-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">
+          <svg width="18" height="16" viewBox="0 0 18 16">
+            <polyline points="1,8 5,2 9,14 13,2 17,8" fill="none" stroke="#666" stroke-width="1.3" />
+          </svg>
+        </div>
+        <div class="lfo-shape-btn" title="Sawtooth"
+          onclick="document.querySelectorAll('.lfo-shape-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">
+          <svg width="18" height="16" viewBox="0 0 18 16">
+            <polyline points="1,13 8,2 8,13 15,2 15,13" fill="none" stroke="#666" stroke-width="1.3" />
+          </svg>
+        </div>
+        <div class="lfo-shape-btn" title="Square"
+          onclick="document.querySelectorAll('.lfo-shape-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">
+          <svg width="18" height="16" viewBox="0 0 18 16">
+            <polyline points="1,12 1,3 8,3 8,12 9,12 9,3 16,3 16,12" fill="none" stroke="#666" stroke-width="1.3" />
+          </svg>
+        </div>
+        <div class="lfo-shape-btn" title="S&H"
+          onclick="document.querySelectorAll('.lfo-shape-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">
+          <svg width="18" height="16" viewBox="0 0 18 16">
+            <polyline points="1,5 4,5 4,11 7,11 7,3 10,3 10,9 13,9 13,13 16,13" fill="none" stroke="#666"
+              stroke-width="1.3" />
+          </svg>
+        </div>
+      </div>
+      <div class="knob-row" style="margin-bottom:10px">
+        <div class="knob-group">
+          <div class="knob purple" style="transform:rotate(30deg)"></div>
+          <div class="knob-label">RATE</div>
+          <div class="knob-val">2.4Hz</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob purple" style="transform:rotate(-20deg)"></div>
+          <div class="knob-label">DEPTH</div>
+          <div class="knob-val">38%</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob sm purple" style="transform:rotate(10deg)"></div>
+          <div class="knob-label">FADE IN</div>
+          <div class="knob-val">0ms</div>
+        </div>
+        <div class="knob-group">
+          <div class="knob sm purple" style="transform:rotate(-35deg)"></div>
+          <div class="knob-label">PHASE</div>
+          <div class="knob-val">0°</div>
+        </div>
+      </div>
+      <div class="mini-toggle" style="margin-bottom:10px"
+        onclick="let t=this.querySelector('.toggle-track');t.classList.toggle('on')">
+        <div class="toggle-track on">
+          <div class="toggle-thumb"></div>
+        </div>
+        <div class="toggle-label">TEMPO SYNC</div>
+      </div>
+      <div style="font-size:9px;color:#444;letter-spacing:1px;margin-bottom:6px;flex-shrink:0">DESTINATION</div>
+      <div class="lfo-dest">
+        <div class="dest-pill active" onclick="this.classList.toggle('active')">PITCH</div>
+        <div class="dest-pill" onclick="this.classList.toggle('active')">CUTOFF</div>
+        <div class="dest-pill" onclick="this.classList.toggle('active')">RESONANCE</div>
+        <div class="dest-pill" onclick="this.classList.toggle('active')">PAN</div>
+        <div class="dest-pill" onclick="this.classList.toggle('active')">AMP</div>
+        <div class="dest-pill" onclick="this.classList.toggle('active')">WARP</div>
+        <div class="dest-pill" onclick="this.classList.toggle('active')">WPOS</div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -7,7 +7,7 @@
 #include "WavetableOscillator.hpp"
 #include <juce_audio_processors/juce_audio_processors.h>
 
-namespace SPECTR::Synth {
+namespace SPECTR {
     // One of 8 polyphonic voices.  Owns a WavetableOscillator and a juce::ADSR.
     // The Synthesiser base class handles note stealing and voice allocation.
     //
@@ -20,7 +20,7 @@ namespace SPECTR::Synth {
             mWavetable = wt;
         }
 
-        void setFramePosition(f32 pos01) {
+        void setFramePosition(const f32 pos01) {
             mOscillator.setFramePosition(pos01);
         }
 
@@ -33,7 +33,7 @@ namespace SPECTR::Synth {
             return sound != nullptr;
         }
 
-        void startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound* sound, int) override {
+        void startNote(const int midiNoteNumber, const float velocity, juce::SynthesiserSound* sound, int) override {
             // noteOn must be called before mAdsr.noteOn() so the oscillator phase
             // and pitch increment are set before the first render call.
             mOscillator.noteOn(midiNoteNumber, velocity, mOscillator.getPhase());
@@ -51,19 +51,24 @@ namespace SPECTR::Synth {
             }
         }
 
-        void renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override {
+        void
+        renderNextBlock(juce::AudioBuffer<float>& outputBuffer, const int startSample, const int numSamples) override {
             if (!mIsActive) return;
 
             // Resize temp buffer if needed (avoids per-block allocation)
             if (_Cast<int>(mTempBuffer.size()) < numSamples) mTempBuffer.resize(_Cast<size_t>(numSamples));
 
-            std::fill(mTempBuffer.begin(), mTempBuffer.begin() + numSamples, 0.0f);
+            std::fill_n(mTempBuffer.begin(), numSamples, 0.0f);
             mOscillator.process(mWavetable, mTempBuffer.data(), numSamples);
 
+            // Scale per voice to prevent clipping with polyphony.
+            // 1/sqrt(N) is the standard equal-power sum normalization.
+            // With kNumVoices = 8 this gives ~0.354, keeping the summed output near 0 dBFS.
+            static constexpr f32 kPolyGain = 1.0f / _Sqrt8;
             // Apply ADSR sample-by-sample and accumulate into all output channels
             for (int i = 0; i < numSamples; ++i) {
                 const f32 env = mAdsr.getNextSample();
-                const f32 s   = mTempBuffer[_Cast<size_t>(i)] * env;
+                const f32 s   = mTempBuffer[_Cast<size_t>(i)] * env * kPolyGain;
                 for (int ch = 0; ch < outputBuffer.getNumChannels(); ++ch)
                     outputBuffer.addSample(ch, startSample + i, s);
             }
@@ -78,7 +83,7 @@ namespace SPECTR::Synth {
         void pitchWheelMoved(int) override {}
         void controllerMoved(int, int) override {}
 
-        void prepareToPlay(f64 sampleRate, int) {
+        void prepareToPlay(const f64 sampleRate, int) {
             mAdsr.setSampleRate(sampleRate);
             mOscillator.prepare(sampleRate);
         }
@@ -101,4 +106,4 @@ namespace SPECTR::Synth {
             return true;
         }
     };
-}  // namespace SPECTR::Synth
+}  // namespace SPECTR
