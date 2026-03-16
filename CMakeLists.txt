@@ -42,9 +42,6 @@ target_sources(SPECTR PRIVATE
         Code/PluginEditor.hpp
         Code/PluginProcessor.cpp
         Code/PluginProcessor.hpp
-        Code/UI/ADSRDisplay.hpp
-        Code/UI/LookAndFeel.hpp
-        Code/UI/WavetableDisplay.hpp
         Code/Voice.hpp
         Code/Wavetable.hpp
         Code/WavetableBuilder.cpp

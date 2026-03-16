@@ -119,9 +119,21 @@
     }
 
     .wt-tag {
-        background: #0a1a2a;
-        color: #4a9fd4;
-        border: 1px solid #0a2a4a
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        background: #102b29;
+        color: var(--primary-accent);
+        border: 1px solid #225c58;
+        font-size: 8pt;
+        margin-left: 4px;
+        margin-top: 2px;
+    }
+
+    .knob-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
     }
 
     .knob-wrap {
@@ -233,58 +245,9 @@
 
     <!-- OSC ROW -->
     <div class="panel-row row-3 top-row" style="height:270px">
-        <!-- OSC 1 ANALOG -->
-        <div class="panel">
-            <div class="panel-title">OSC 1 <span class="tag analog-tag">ANALOG</span></div>
-            <svg class="waveform-display" viewBox="0 0 200 36" preserveAspectRatio="none">
-                <polyline points="0,18 25,18 25,4 50,32 75,4 100,32 125,4 150,32 175,4 200,18" fill="none"
-                          stroke="#d4702a"
-                          stroke-width="1.5"/>
-            </svg>
-            <div class="seg-control" style="margin-top:8px;margin-bottom:0">
-                <button class="seg-btn active"
-                        onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">
-                    SAW
-                </button>
-                <button class="seg-btn"
-                        onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">
-                    SQR
-                </button>
-                <button class="seg-btn"
-                        onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">
-                    TRI
-                </button>
-                <button class="seg-btn"
-                        onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">
-                    SIN
-                </button>
-            </div>
-            <div class="section-sep"></div>
-            <div class="knob-wrap">
-                <canvas class="knob" id="knob-gain" data-param="gain" data-value="0.5" width="160"
-                        height="160"></canvas>
-                <span class="knob-label">Gain</span>
-            </div>
-            <div style="display:flex;gap:16px;margin-top:8px">
-                <div class="mini-toggle" onclick="let t=this.querySelector('.toggle-track');t.classList.toggle('on')">
-                    <div class="toggle-track on">
-                        <div class="toggle-thumb"></div>
-                    </div>
-                    <div class="toggle-label">SYNC</div>
-                </div>
-                <div class="mini-toggle" onclick="let t=this.querySelector('.toggle-track');t.classList.toggle('on')">
-                    <div class="toggle-track">
-                        <div class="toggle-thumb"></div>
-                    </div>
-                    <div class="toggle-label">RING MOD</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- OSC 2 WAVETABLE -->
         <div class="panel">
             <div style="display: flex; flex-direction: row; align-items: center">
-                <div class="panel-title" style="flex: 1;">OSC 2 <span class="tag wt-tag">WAVETABLE</span></div>
+                <div class="panel-title" style="flex: 1;">OSC 1 <span class="tag wt-tag">WAVETABLE</span></div>
                 <button id="load-wavetable-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>folder-open</title>
                         <path fill="#777"
@@ -293,77 +256,23 @@
                 </button>
             </div>
             <canvas id="wavetable-display" class="waveform" width="351" height="151"></canvas>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;margin-bottom:0">
-                <div style="font-size:9px;color:#444;letter-spacing:1px">TABLE BANK</div>
-                <div class="seg-control">
-                    <button class="seg-btn active blue"
-                            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','blue')});this.classList.add('active','blue')">
-                        BASIC
-                    </button>
-                    <button class="seg-btn"
-                            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','blue')});this.classList.add('active','blue')">
-                        PWR
-                    </button>
-                    <button class="seg-btn"
-                            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','blue')});this.classList.add('active','blue')">
-                        VOCAL
-                    </button>
-                    <button class="seg-btn"
-                            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','blue')});this.classList.add('active','blue')">
-                        XTND
-                    </button>
-                </div>
-            </div>
             <div class="section-sep"></div>
-            <div class="mini-toggle" onclick="let t=this.querySelector('.toggle-track');t.classList.toggle('on')">
-                <div class="toggle-track">
-                    <div class="toggle-thumb"></div>
+            <div class="knob-row">
+                <div class="knob-wrap">
+                    <canvas id="knob-frame-pos" class="knob" data-param="framePos" data-value="0.0" width="160"
+                            height="160"></canvas>
+                    <span class="knob-label">Position</span>
                 </div>
-                <div class="toggle-label">PHASE RESET</div>
-            </div>
-        </div>
-
-        <!-- OSC 3 WAVETABLE -->
-        <div class="panel">
-            <div class="panel-title">OSC 3 <span class="tag wt-tag">WAVETABLE</span></div>
-            <svg class="waveform-display" viewBox="0 0 200 36" preserveAspectRatio="none">
-                <path d="M0,18 L22,4 L22,32 L44,4 L44,32 L66,18 L88,4 L110,32 L132,18 L154,4 L176,32 L200,18"
-                      fill="none"
-                      stroke="#4ad4a0" stroke-width="1.5"/>
-                <defs>
-                    <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0" stop-color="#4ad4a0" stop-opacity="0.12"/>
-                        <stop offset="1" stop-color="#4ad4a0" stop-opacity="0"/>
-                    </linearGradient>
-                </defs>
-            </svg>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;margin-bottom:0">
-                <div style="font-size:9px;color:#444;letter-spacing:1px">TABLE BANK</div>
-                <div class="seg-control">
-                    <button class="seg-btn active green"
-                            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','green')});this.classList.add('active','green')">
-                        HARM
-                    </button>
-                    <button class="seg-btn"
-                            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','green')});this.classList.add('active','green')">
-                        FMTD
-                    </button>
-                    <button class="seg-btn"
-                            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','green')});this.classList.add('active','green')">
-                        PAD
-                    </button>
-                    <button class="seg-btn"
-                            onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>{b.classList.remove('active','green')});this.classList.add('active','green')">
-                        XTND
-                    </button>
+                <div class="knob-wrap">
+                    <canvas id="knob-warp" class="knob" data-param="osc1Warp" data-value="0.0" width="160"
+                            height="160"></canvas>
+                    <span class="knob-label">Warp</span>
                 </div>
-            </div>
-            <div class="section-sep"></div>
-            <div class="mini-toggle" onclick="let t=this.querySelector('.toggle-track');t.classList.toggle('on')">
-                <div class="toggle-track on">
-                    <div class="toggle-thumb"></div>
+                <div class="knob-wrap">
+                    <canvas id="knob-gain" class="knob" data-param="osc1Level" data-value="0.6" width="160"
+                            height="160"></canvas>
+                    <span class="knob-label">Level</span>
                 </div>
-                <div class="toggle-label">PHASE RESET</div>
             </div>
         </div>
     </div>
@@ -408,7 +317,7 @@
         const bodyR = r * 0.80;
         ctx.beginPath();
         ctx.arc(cx, cy, bodyR, 0, Math.PI * 2);
-        ctx.fillStyle = "#161616";
+        ctx.fillStyle = "#121212";
         ctx.fill();
         // ctx.strokeStyle = "#444";
         // ctx.lineWidth = s * 0.015;
@@ -502,18 +411,18 @@
         wtCtx.clearRect(0, 0, w, h);
 
         // --- Background ---------------------------------------------------------
-        wtCtx.fillStyle = "#1e2a2a";   // Colors::Panel equivalent
+        wtCtx.fillStyle = "#090909";   // Colors::Panel equivalent
         roundRect(wtCtx, pad, pad, w - pad * 2, h - pad * 2, 6);
         wtCtx.fill();
 
         // --- Border -------------------------------------------------------------
-        wtCtx.strokeStyle = "#2e4444";  // Colors::PanelBorder equivalent
+        wtCtx.strokeStyle = "#333";  // Colors::PanelBorder equivalent
         wtCtx.lineWidth = 1;
         roundRect(wtCtx, pad, pad, w - pad * 2, h - pad * 2, 6);
         wtCtx.stroke();
 
         if (!wavetableFrames || wavetableFrames.length === 0) {
-            wtCtx.fillStyle = "#667";
+            wtCtx.fillStyle = "#777";
             wtCtx.font = "13px -apple-system, sans-serif";
             wtCtx.textAlign = "center";
             wtCtx.fillText("No wavetable loaded", w / 2, h / 2 + 5);

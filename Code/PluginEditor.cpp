@@ -49,12 +49,16 @@ namespace SPECTR {
     }
 
     void SPECTREditor::parameterValueChanged(
-      int parameterIndex,
-      float newValue) {  // parameterValueChanged can fire on the audio thread — must marshal to message thread
-        // NOTE: wire in the actual paramId here once you have your parameter list
-        juce::MessageManager::callAsync([this, newValue] {
-            updateUIParam("gain", newValue);  // replace with real param ID lookup
-        });
+      const int parameterIndex,
+      const float newValue) {  // parameterValueChanged can fire on the audio thread — must marshal to message thread
+        const auto* param  = audioProcessor.getParameters()[parameterIndex];
+        const auto* ranged = dynamic_cast<const juce::RangedAudioParameter*>(param);
+        if (ranged == nullptr) return;
+
+        const auto paramID    = ranged->getParameterID();
+        const auto normalized = ranged->getNormalisableRange().convertTo0to1(newValue);
+
+        juce::MessageManager::callAsync([this, paramID, normalized] { updateUIParam(paramID, normalized); });
     }
 
     void SPECTREditor::parameterGestureChanged(int parameterIndex, bool gestureIsStarting) {}
