@@ -31,6 +31,8 @@ juce_add_plugin(SPECTR
         COPY_PLUGIN_AFTER_BUILD TRUE
         VST3_COPY_DIR "C:/Program Files/Common Files/VST3/Rieger DSP"  # Windows
         STANDALONE_COPY_DIR "C:/Program Files/Rieger DSP"
+
+        NEEDS_WEBVIEW2 TRUE
 )
 
 target_sources(SPECTR PRIVATE
@@ -63,7 +65,8 @@ target_link_libraries(SPECTR PRIVATE
 )
 
 target_compile_definitions(SPECTR PUBLIC
-        JUCE_WEB_BROWSER=0
+        JUCE_WEB_BROWSER=1
+        JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING=1
         JUCE_USE_CURL=0
         JUCE_VST3_CAN_REPLACE_VST2=0
 )
