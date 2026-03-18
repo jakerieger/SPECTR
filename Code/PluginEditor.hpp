@@ -27,8 +27,8 @@ namespace SPECTR {
         // Send a normalized value to the JS layer
         void updateUIParam(const juce::String& paramID, f32 normalizedValue);
 
-        void openFilePicker();
-        void sendWavetableToUI();
+        void openFilePicker(const juce::String& oscId = "osc1");
+        void sendWavetableToUI(const juce::String& oscId = "osc1");
 
         SPECTRProcessor& audioProcessor;
         std::unique_ptr<juce::FileChooser> mFileChooser;
@@ -51,8 +51,10 @@ namespace SPECTR {
                                            param->setValueNotifyingHost(value);
                                    }
                                })
-            .withEventListener("openFilePicker",
-                               [this](juce::var) { juce::MessageManager::callAsync([this] { openFilePicker(); }); })};
+            .withEventListener("openFilePicker", [this](const juce::var& data) {
+                auto oscId = data["oscId"].toString();
+                juce::MessageManager::callAsync([this, oscId] { openFilePicker(oscId); });
+            })};
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SPECTREditor)
     };

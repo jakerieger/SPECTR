@@ -9,6 +9,11 @@ add_subdirectory(JUCE)
 juce_add_binary_data(EmbeddedResources
         SOURCES
         Resources/index.html
+        Resources/style.css
+        Resources/main.js
+        Resources/knob.js
+        Resources/dropdown.js
+        Resources/wtDisplay.js
 
         HEADER_NAME BinaryData.h
         NAMESPACE BinaryData

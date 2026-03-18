@@ -1,0 +1,431 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600&display=swap');
+
+:root {
+    --background: #191a2a;
+    --panel: #222436;
+    --border: #2f334d;
+    --display: #040507;
+    --display-secondary: #0e101a;
+    --input: #2f334d;
+    --input-border: #68768a;
+    --text-primary: #d7dbf5;
+    --text-secondary: #8b90ad;
+    --text-disabled: #515675;
+    --primary-accent: #33b7d9;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0
+}
+
+body {
+    background-color: #222;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+button:hover {
+    opacity: 0.67;
+    cursor: pointer;
+}
+
+button:active {
+    opacity: 0.4;
+}
+
+.synth {
+    background: var(--display);
+    font-family: 'Rajdhani', sans-serif;
+    padding: 4px;
+    color: #c8c8c8;
+    width: 1200px;
+    height: 800px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.synth-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px;
+    border: 1px solid var(--border);
+    background: var(--background);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-bottom: 4px;
+}
+
+.synth-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px;
+    letter-spacing: 5px;
+    color: var(--text-primary);
+    text-transform: uppercase
+}
+
+.panel-row {
+    display: grid;
+    gap: 2px;
+    flex: 1;
+    min-height: 0
+}
+
+.row-3 {
+    grid-template-columns: 1fr 1fr 1fr
+}
+
+.row-4 {
+    grid-template-columns: 1.1fr 1.2fr 1fr 1fr
+}
+
+.top-row {
+    flex: 0 0 auto;
+    margin-bottom: 2px
+}
+
+.bottom-row {
+    flex: 1;
+    min-height: 0
+}
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column
+}
+
+.panel-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: var(--background);
+    padding-left: 8px;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    height: 32px;
+}
+
+.panel-title {
+    font-size: 12pt;
+    margin-left: 4px;
+    margin-right: 24px;
+    user-select: none;
+}
+
+.osc-type-dropdown {
+    position: relative;
+    height: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    border-left: 1px solid var(--panel);
+}
+
+.osc-type-dropdown-selected:hover {
+    background: var(--input);
+    cursor: pointer;
+}
+
+.osc-type-dropdown-selected {
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    user-select: none;
+    line-height: 36px;
+    text-transform: uppercase;
+    font-size: 10pt;
+    font-weight: bold;
+    transition: 200ms;
+}
+
+.osc-type-dropdown-arrow {
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    right: 2px;
+    top: 4px;
+}
+
+.osc-type-dropdown-menu {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    border: 1px solid var(--border);
+    transition: 200ms;
+    z-index: 99;
+    background: var(--background);
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.osc-type-dropdown-menu :last-child {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.osc-type-dropdown-menu.active {
+    display: initial;
+}
+
+.osc-type-dropdown-item {
+    padding: 12px;
+    text-align: center;
+    text-transform: uppercase;
+    user-select: none;
+    transition: 200ms;
+    font-size: 10pt;
+}
+
+.osc-type-dropdown-item.selected {
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.osc-type-dropdown-item:hover {
+    background: var(--input);
+    color: var(--text-primary);
+}
+
+.knob-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    padding-top: 8px;
+    padding-bottom: 16px;
+}
+
+.knob-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+}
+
+canvas.knob {
+    display: block;
+    cursor: ns-resize;
+    /* Crisp on HiDPI — actual size set in JS */
+    width: 80px;
+    height: 80px;
+}
+
+.knob-label {
+    font-size: 10pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.seg-control {
+    display: flex;
+    flex-direction: row;
+    background: var(--input);
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    min-height: 2em;
+    /*box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);*/
+}
+
+.seg-control :first-child {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+
+.seg-control :last-child {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.seg-control.sm {
+    min-height: 1.6em;
+}
+
+.seg-control.sm .seg-btn {
+    font-size: 8pt;
+}
+
+.seg-btn {
+    flex: 1;
+    min-width: 56px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: none;
+    background: transparent;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 500;
+    transition: all 0.15s;
+    font-size: 10pt;
+}
+
+.seg-btn.active {
+    background: var(--background);
+    color: var(--primary-accent);
+    font-weight: bold;
+}
+
+#menubar {
+    position: absolute;
+    left: 32%;
+    right: 32%;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: #08090e;
+    border: 1px solid var(--panel);
+    border-radius: 4px;
+}
+
+#menubar-left {
+    border-right: 1px solid var(--panel);
+}
+
+#menubar-right {
+    border-left: 1px solid var(--panel);
+}
+
+#menubar-left button,
+#menubar-right button {
+    padding: 8px;
+    width: 40px;
+    background: none;
+    border: none;
+    outline: none;
+    transition: 100ms;
+}
+
+#menubar-center {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#menubar-center button {
+    width: 40px;
+    height: 40px;
+    padding: 4px;
+    background: none;
+    border: none;
+    outline: none;
+}
+
+#preset-nav-current-preset {
+    flex: 1;
+    text-align: center;
+    color: var(--text-primary);
+}
+
+.radio-button {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+}
+
+.radio-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--display);
+}
+
+.radio-button.active::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary-accent);
+}
+
+.osc-display {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--panel);
+}
+
+.wavetable-menu {
+    width: 100%;
+    height: 28px;
+    background: var(--display-secondary);
+    border-top: 1px solid var(--panel);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+[data-wavetable-current] {
+    flex: 1;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    text-align: center;
+    font-size: 8pt;
+    letter-spacing: 2px;
+    font-weight: bold;
+    padding-top: 4px;
+}
+
+[data-wavetable-previous], [data-wavetable-next] {
+    height: 28px;
+    width: 28px;
+}
+
+[data-wavetable-display] {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    width: 100%;
+    display: block; /* prevents inline baseline gap */
+}
+
+[data-load-wavetable] {
+    width: 32px;
+    height: 32px;
+    padding: 8px;
+    border-left: 1px solid var(--panel);
+}
+
+[data-load-wavetable]:hover {
+    cursor: pointer;
+    background: var(--input);
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+[data-load-wavetable]:active {
+    background: var(--text-disabled);
+}

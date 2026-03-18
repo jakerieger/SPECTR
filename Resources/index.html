@@ -1,227 +1,53 @@
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600&display=swap');
+<!-- Stylesheets -->
+<link rel="stylesheet" href="style.css">
 
-    :root {
-        --background: #111;
-        --panel: #181818;
-        --border: #282828;
-        --display: #080808;
-        --input: #222222;
-        --input-border: #3D3D3D;
-        --text-primary: #DDD;
-        --text-secondary: #999;
-        --primary-accent: #4ECDC4;
-    }
+<!-- Scripts -->
+<script src="main.js" defer></script>
+<script src="knob.js" defer></script>
+<script src="dropdown.js" defer></script>
+<script src="wtDisplay.js" defer></script>
 
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0
-    }
-
-    body {
-        background-color: black;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-    }
-
-    .synth {
-        background: var(--background);
-        font-family: 'Rajdhani', sans-serif;
-        padding: 20px;
-        color: #c8c8c8;
-        width: 1200px;
-        height: 800px;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden
-    }
-
-    .synth-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 14px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid var(--border);
-        flex-shrink: 0
-    }
-
-    .synth-name {
-        font-family: 'Share Tech Mono', monospace;
-        font-size: 18px;
-        letter-spacing: 5px;
-        color: var(--text-primary);
-        text-transform: uppercase
-    }
-
-    .panel-row {
-        display: grid;
-        gap: 8px;
-        flex: 1;
-        min-height: 0
-    }
-
-    .row-3 {
-        grid-template-columns: 1fr 1fr 1fr
-    }
-
-    .row-4 {
-        grid-template-columns: 1.1fr 1.2fr 1fr 1fr
-    }
-
-    .top-row {
-        flex: 0 0 auto;
-        margin-bottom: 8px
-    }
-
-    .bottom-row {
-        flex: 1;
-        min-height: 0
-    }
-
-    .panel {
-        background: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: 4px;
-        padding: 12px 14px;
-        display: flex;
-        flex-direction: column
-    }
-
-    .panel-title {
-        font-family: 'Share Tech Mono', monospace;
-        font-size: 10pt;
-        letter-spacing: 2px;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        flex-shrink: 0
-    }
-
-    .tag {
-        font-size: 8px;
-        padding: 1px 5px;
-        border-radius: 3px;
-        letter-spacing: 1px
-    }
-
-    .analog-tag {
-        background: #2a1a0a;
-        color: #d4702a;
-        border: 1px solid #4a2a0a
-    }
-
-    .wt-tag {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        background: #102b29;
-        color: var(--primary-accent);
-        border: 1px solid #225c58;
-        font-size: 8pt;
-        margin-left: 4px;
-        margin-top: 2px;
-    }
-
-    .knob-row {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-evenly;
-    }
-
-    .knob-wrap {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        user-select: none;
-    }
-
-    canvas.knob {
-        display: block;
-        cursor: ns-resize;
-        /* Crisp on HiDPI — actual size set in JS */
-        width: 80px;
-        height: 80px;
-    }
-
-    canvas.waveform {
-        width: 100%;
-        height: 60%;
-    }
-
-    .knob-label {
-        font-size: 10pt;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--text-primary);
-    }
-
-    .seg-control {
-        display: flex;
-        flex-direction: row;
-        background: var(--input);
-        border-radius: 5px;
-        border: 0 solid var(--input-border);
-        overflow: hidden;
-        min-height: 2em;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    }
-
-    .seg-btn {
-        flex: 1;
-        padding: 3px 8px;
-        cursor: pointer;
-        color: var(--text-secondary);
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        border: none;
-        background: transparent;
-        font-family: 'Rajdhani', sans-serif;
-        font-weight: 500;
-        transition: all 0.15s;
-        font-size: 10pt;
-    }
-
-    .seg-btn.active {
-        background: var(--background);
-        color: var(--primary-accent);
-        font-weight: bold;
-    }
-
-    #load-wavetable-btn {
-        width: 24px;
-        height: 24px;
-        margin-bottom: 6px;
-        outline: none;
-        border: 1px solid var(--input-border);
-        background: var(--input);
-        padding: 2px;
-        border-radius: 4px;
-        transition: 150ms;
-    }
-
-    #load-wavetable-btn:hover {
-        opacity: 0.67;
-    }
-</style>
-
+<!-- UI HTML -->
 <div class="synth">
     <div class="synth-header">
         <div style="display:flex;align-items:baseline;gap:12px">
             <div class="synth-name">SPECTR</div>
-            <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#333;letter-spacing:3px">POLYPHONIC
+            <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-secondary);letter-spacing:3px">
+                MORPH
                 SYNTHESIZER
             </div>
         </div>
+        <div id="menubar">
+            <div id="menubar-left">
+                <button id="menu-dropdown-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>menu</title>
+                        <path fill="var(--text-secondary)" d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="menubar-center">
+                <button id="preset-nav-left">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>menu-left</title>
+                        <path fill="var(--text-disabled)" d="M14,7L9,12L14,17V7Z"/>
+                    </svg>
+                </button>
+                <div id="preset-nav-current-preset">BS Sub Bass 01</div>
+                <button id="preset-nav-right">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>menu-right</title>
+                        <path fill="var(--text-disabled)" d="M10,17L15,12L10,7V17Z"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="menubar-right">
+                <button id="preset-dropdown-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>menu-down</title>
+                        <path fill="var(--text-secondary)" d="M7,10L12,15L17,10H7Z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
         <div style="display:flex;align-items:center;gap:16px">
-            <div style="font-size:9px;color:#444;letter-spacing:2px">VOICE</div>
+            <div style="font-size:9px;color:var(--text-secondary);letter-spacing:2px">VOICE</div>
             <div class="seg-control">
                 <button class="seg-btn active"
                         onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">
@@ -231,32 +57,52 @@
                         onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">
                     POLY
                 </button>
-                <button class="seg-btn"
-                        onclick="this.parentNode.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">
-                    UNI
-                </button>
-            </div>
-            <div style="display:flex;align-items:center;gap:5px">
-                <div class="led on"></div>
-                <div style="font-size:9px;color:#444;letter-spacing:1px">PWR</div>
             </div>
         </div>
     </div>
 
     <!-- OSC ROW -->
     <div class="panel-row row-3 top-row" style="height:270px">
-        <div class="panel">
-            <div style="display: flex; flex-direction: row; align-items: center">
-                <div class="panel-title" style="flex: 1;">OSC 1 <span class="tag wt-tag">WAVETABLE</span></div>
-                <button id="load-wavetable-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>folder-open</title>
-                        <path fill="#777"
+        <div id="osc-1" class="panel">
+            <div class="panel-header">
+                <div class="radio-button active" id="osc1-enabled-btn"></div>
+                <div class="panel-title">OSC 1</div>
+                <div class="osc-type-dropdown">
+                    <div class="osc-type-dropdown-selected">Wavetable</div>
+                    <div class="osc-type-dropdown-arrow">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>menu-down</title>
+                            <path fill="var(--text-disabled)" d="M7,10L12,15L17,10H7Z"/>
+                        </svg>
+                    </div>
+                    <div class="osc-type-dropdown-menu">
+                        <div class="osc-type-dropdown-item">Analog</div>
+                        <div class="osc-type-dropdown-item">Sample</div>
+                        <div class="osc-type-dropdown-item selected">Wavetable</div>
+                    </div>
+                </div>
+                <div data-load-wavetable="osc1">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Load Wavetable</title>
+                        <path fill="var(--input-border)"
                               d="M19,20H4C2.89,20 2,19.1 2,18V6C2,4.89 2.89,4 4,4H10L12,6H19A2,2 0 0,1 21,8H21L4,8V18L6.14,10H23.21L20.93,18.5C20.7,19.37 19.92,20 19,20Z"/>
                     </svg>
-                </button>
+                </div>
             </div>
-            <canvas id="wavetable-display" class="waveform" width="351" height="151"></canvas>
-            <div class="section-sep"></div>
+            <div class="osc-display wavetable">
+                <div class="wavetable-menu">
+                    <div data-wavetable-previous="osc1">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>menu-left</title>
+                            <path fill="var(--text-disabled)" d="M14,7L9,12L14,17V7Z"/>
+                        </svg>
+                    </div>
+                    <div data-wavetable-current="osc1">Basic Shapes</div>
+                    <div data-wavetable-next="osc1">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>menu-right</title>
+                            <path fill="var(--text-disabled)" d="M10,17L15,12L10,7V17Z"/>
+                        </svg>
+                    </div>
+                </div>
+                <canvas data-wavetable-display="osc1" height="140"></canvas>
+            </div>
             <div class="knob-row">
                 <div class="knob-wrap">
                     <canvas id="knob-frame-pos" class="knob" data-param="framePos" data-value="0.0" width="160"
@@ -277,281 +123,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    // ─── Constants ────────────────────────────────────────────────────────────
-    const MIN_ANGLE = -135 * (Math.PI / 180);   // -135° in radians
-    const MAX_ANGLE = 135 * (Math.PI / 180);   //  135° in radians
-    const DRAG_PX = 200;                       // px of drag = full 0→1 sweep
-
-    // ─── Draw a single knob onto its canvas ──────────────────────────────────
-    function drawKnob(canvas, value) {
-        const dpr = window.devicePixelRatio || 1;
-        const s = canvas.width;          // native pixel size (160 at 2x)
-        const cx = s / 2;
-        const cy = s / 2;
-        const r = s * 0.38;              // outer radius
-        const ctx = canvas.getContext("2d");
-
-        ctx.clearRect(0, 0, s, s);
-
-        // --- Track arc (full sweep, dim) ------------------------------------
-        const trackWidth = s * 0.03;
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, MIN_ANGLE - Math.PI * 0.5, MAX_ANGLE - Math.PI * 0.5);
-        ctx.strokeStyle = "#444";
-        ctx.lineWidth = trackWidth;
-        ctx.lineCap = "round";
-        ctx.stroke();
-
-        // --- Value arc (filled portion) -------------------------------------
-        const valueAngle = MIN_ANGLE + value * (MAX_ANGLE - MIN_ANGLE);
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, MIN_ANGLE - Math.PI * 0.5, valueAngle - Math.PI * 0.5);
-        ctx.strokeStyle = "#4ECDC4";
-        ctx.lineWidth = trackWidth;
-        ctx.lineCap = "round";
-        ctx.stroke();
-
-        // --- Body circle ----------------------------------------------------
-        const bodyR = r * 0.80;
-        ctx.beginPath();
-        ctx.arc(cx, cy, bodyR, 0, Math.PI * 2);
-        ctx.fillStyle = "#121212";
-        ctx.fill();
-        // ctx.strokeStyle = "#444";
-        // ctx.lineWidth = s * 0.015;
-        // ctx.stroke();
-
-        // --- Indicator line --------------------------------------------------
-        const dotAngle = valueAngle - Math.PI * 0.5;
-        const lineInner = bodyR * 0.25;
-        const lineOuter = bodyR * 0.65;
-        ctx.beginPath();
-        ctx.moveTo(cx + Math.cos(dotAngle) * lineInner, cy + Math.sin(dotAngle) * lineInner);
-        ctx.lineTo(cx + Math.cos(dotAngle) * lineOuter, cy + Math.sin(dotAngle) * lineOuter);
-        ctx.strokeStyle = "#797979";
-        ctx.lineWidth = s * 0.02;
-        ctx.lineCap = "round";
-        ctx.stroke();
-    }
-
-    // ─── Initialize all canvases and set starting visuals ────────────────────
-    const knobs = {};   // keyed by paramId
-
-    document.querySelectorAll("canvas[data-param]").forEach(canvas => {
-        const paramId = canvas.dataset.param;
-        const value = parseFloat(canvas.dataset.value);
-
-        knobs[paramId] = {canvas, value};
-        drawKnob(canvas, value);
-    });
-
-    // ─── Update knob value + label display ───────────────────────────────────
-    function setKnobValue(paramId, value, redraw = true) {
-        value = Math.max(0, Math.min(1, value));
-        const entry = knobs[paramId];
-        if (!entry) return;
-        entry.value = value;
-        if (redraw) drawKnob(entry.canvas, value);
-
-        const valEl = document.getElementById("val-" + paramId);
-        if (valEl) valEl.textContent = value.toFixed(2);
-    }
-
-    // ─── Drag handling ───────────────────────────────────────────────────────
-    let drag = null;   // { paramId, startY, startVal }
-
-    document.querySelectorAll("canvas[data-param]").forEach(canvas => {
-        canvas.addEventListener("pointerdown", e => {
-            const paramId = canvas.dataset.param;
-            drag = {
-                paramId,
-                startY: e.clientY,
-                startVal: knobs[paramId].value
-            };
-            canvas.setPointerCapture(e.pointerId);
-            e.preventDefault();
-        });
-
-        // Double-click resets to 0.5
-        canvas.addEventListener("dblclick", () => {
-            const paramId = canvas.dataset.param;
-            setKnobValue(paramId, 0.5);
-            sendToPlugin(paramId, 0.5);
-        });
-    });
-
-    window.addEventListener("pointermove", e => {
-        if (!drag) return;
-        const delta = (drag.startY - e.clientY) / DRAG_PX;
-        const newVal = Math.max(0, Math.min(1, drag.startVal + delta));
-        setKnobValue(drag.paramId, newVal);
-        sendToPlugin(drag.paramId, newVal);
-    });
-
-    window.addEventListener("pointerup", () => {
-        drag = null;
-    });
-
-    // ─── Wavetable Display ───────────────────────────────────────────────────────
-
-    const wtCanvas = document.getElementById("wavetable-display");
-    const wtCtx = wtCanvas.getContext("2d");
-
-    // Mirrors WavetableData* — set this when the plugin sends frame data over the bridge
-    let wavetableFrames = null;   // Float32Array[] — one per frame, each length = draw resolution
-    let wtPosition = 0.0;   // normalised 0–1, mirrors mPosition
-
-    function drawWavetable() {
-        const w = wtCanvas.width;
-        const h = wtCanvas.height;
-        const pad = 2;
-
-        wtCtx.clearRect(0, 0, w, h);
-
-        // --- Background ---------------------------------------------------------
-        wtCtx.fillStyle = "#090909";   // Colors::Panel equivalent
-        roundRect(wtCtx, pad, pad, w - pad * 2, h - pad * 2, 6);
-        wtCtx.fill();
-
-        // --- Border -------------------------------------------------------------
-        wtCtx.strokeStyle = "#333";  // Colors::PanelBorder equivalent
-        wtCtx.lineWidth = 1;
-        roundRect(wtCtx, pad, pad, w - pad * 2, h - pad * 2, 6);
-        wtCtx.stroke();
-
-        if (!wavetableFrames || wavetableFrames.length === 0) {
-            wtCtx.fillStyle = "#777";
-            wtCtx.font = "13px -apple-system, sans-serif";
-            wtCtx.textAlign = "center";
-            wtCtx.fillText("No wavetable loaded", w / 2, h / 2 + 5);
-            return;
-        }
-
-        const numFrames = wavetableFrames.length;
-        const framePos = wtPosition * (numFrames - 1);
-        const f0 = Math.floor(framePos) % numFrames;
-        const f1 = (f0 + 1) % numFrames;
-        const frac = framePos - Math.floor(framePos);
-
-        const cx = w / 2;
-        const cy = h / 2;
-        const halfH = (h - pad * 2) * 0.42;
-        const left = pad;
-        const right = w - pad;
-        const drawPoints = right - left;
-
-        // --- Build waveform path ------------------------------------------------
-        wtCtx.beginPath();
-        for (let px = 0; px < drawPoints; px++) {
-            const phase = px / drawPoints;
-            const s0 = sampleFrame(wavetableFrames[f0], phase);
-            const s1 = sampleFrame(wavetableFrames[f1], phase);
-            const s = s0 + frac * (s1 - s0);
-
-            const x = left + px;
-            const y = cy - s * halfH;
-            px === 0 ? wtCtx.moveTo(x, y) : wtCtx.lineTo(x, y);
-        }
-
-        // --- Gradient fill under wave -------------------------------------------
-        const fillGrad = wtCtx.createLinearGradient(0, pad, 0, h - pad);
-        fillGrad.addColorStop(0, "rgba(78, 205, 196, 0.25)");
-        fillGrad.addColorStop(1, "rgba(78, 205, 196, 0.00)");
-
-        wtCtx.lineTo(right, cy);
-        wtCtx.lineTo(left, cy);
-        wtCtx.closePath();
-        wtCtx.fillStyle = fillGrad;
-        wtCtx.fill();
-
-        // --- Waveform line ------------------------------------------------------
-        wtCtx.beginPath();
-        for (let px = 0; px < drawPoints; px++) {
-            const phase = px / drawPoints;
-            const s0 = sampleFrame(wavetableFrames[f0], phase);
-            const s1 = sampleFrame(wavetableFrames[f1], phase);
-            const s = s0 + frac * (s1 - s0);
-            const x = left + px;
-            const y = cy - s * halfH;
-            px === 0 ? wtCtx.moveTo(x, y) : wtCtx.lineTo(x, y);
-        }
-        wtCtx.strokeStyle = "#4ecdc4";
-        wtCtx.lineWidth = 1.5;
-        wtCtx.lineJoin = "round";
-        wtCtx.stroke();
-
-        // --- Frame label --------------------------------------------------------
-        const frameIdx = Math.round(wtPosition * (numFrames - 1));
-        wtCtx.fillStyle = "#ccc";
-        wtCtx.font = "11px -apple-system, sans-serif";
-        wtCtx.textAlign = "right";
-        wtCtx.fillText("Frame " + (frameIdx + 1), right - 6, pad + 14);
-    }
-
-    // Linear interpolation within a single frame (mirrors getSample)
-    function sampleFrame(frame, phase) {
-        const len = frame.length;
-        const pos = phase * (len - 1);
-        const i0 = Math.floor(pos) % len;
-        const i1 = (i0 + 1) % len;
-        const t = pos - Math.floor(pos);
-        return frame[i0] + t * (frame[i1] - frame[i0]);
-    }
-
-    // Helper — CanvasRenderingContext2D rounded rect (pre-roundRect API compat)
-    function roundRect(ctx, x, y, w, h, r) {
-        ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.lineTo(x + w - r, y);
-        ctx.arcTo(x + w, y, x + w, y + r, r);
-        ctx.lineTo(x + w, y + h - r);
-        ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
-        ctx.lineTo(x + r, y + h);
-        ctx.arcTo(x, y + h, x, y + h - r, r);
-        ctx.lineTo(x, y + r);
-        ctx.arcTo(x, y, x + r, y, r);
-        ctx.closePath();
-    }
-
-    // ─── Bridge: JS → C++ ────────────────────────────────────────────────────
-    function sendToPlugin(paramId, value) {
-        if (window.__JUCE__?.backend)
-            window.__JUCE__.backend.emitEvent("setParam", {paramId, value});
-    }
-
-    // ─── Bridge: C++ → JS ────────────────────────────────────────────────────
-    // Called by C++: webView.emitEventIfBrowserIsVisible("paramChanged", ...)
-    function setupJUCEListeners() {
-        if (!window.__JUCE__?.backend) return;
-
-        document.getElementById("load-wavetable-btn").addEventListener("click", () => {
-            window.__JUCE__.backend.emitEvent("openFilePicker", {});
-        });
-
-        window.__JUCE__.backend.addEventListener("wavetableData", data => {
-            // data.frames is a 2D array: Array<Array<number>> — one Float32Array per frame
-            wavetableFrames = data.frames.map(f => new Float32Array(f));
-            drawWavetable();
-        });
-
-        window.__JUCE__.backend.addEventListener("paramChanged", data => {
-            if (data.paramId === "framePos") {
-                wtPosition = data.value;
-                drawWavetable();
-            } else {
-                setKnobValue(data.paramId, data.value);
-            }
-        });
-    }
-
-    // __JUCE__ is injected asynchronously — wait for it if not yet available
-    if (window.__JUCE__?.backend) {
-        setupJUCEListeners();
-    } else {
-        window.addEventListener("juceReady", setupJUCEListeners, {once: true});
-    }
-
-    drawWavetable();
-</script>

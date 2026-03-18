@@ -73,7 +73,7 @@ namespace SPECTR {
         }());
     }
 
-    void SPECTREditor::openFilePicker() {
+    void SPECTREditor::openFilePicker(const juce::String& oscId) {
         mFileChooser =
           std::make_unique<juce::FileChooser>("Load Wavetable Audio File",
                                               juce::File::getSpecialLocation(juce::File::userDesktopDirectory),
@@ -81,7 +81,7 @@ namespace SPECTR {
                                               true);
 
         mFileChooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
-                                  [this](const juce::FileChooser& fc) {
+                                  [this, oscId](const juce::FileChooser& fc) {
                                       const auto results = fc.getResults();
                                       if (results.isEmpty()) return;
                                       const juce::File chosen = results[0];
@@ -89,9 +89,7 @@ namespace SPECTR {
 
                                       if (ok) {
                                           // Refresh display after successful load
-                                          // mWavetableDisplay.setWavetableAndFrame(&audioProcessor.getWavetableData(),
-                                          //                                        _Cast<f32>(mFramePosKnob.slider.getValue()));
-                                          sendWavetableToUI();
+                                          sendWavetableToUI(oscId);
                                       } else {
                                           juce::AlertWindow::showMessageBoxAsync(
                                             juce::AlertWindow::WarningIcon,
@@ -103,7 +101,7 @@ namespace SPECTR {
                                   });
     }
 
-    void SPECTREditor::sendWavetableToUI() {
+    void SPECTREditor::sendWavetableToUI(const juce::String& oscId) {
         auto frames = juce::Array<juce::var>();
 
         for (int f = 0; f < Wavetable::kNumFrames; f++) {
@@ -116,6 +114,7 @@ namespace SPECTR {
         }
 
         auto obj = std::make_unique<juce::DynamicObject>();
+        obj->setProperty("oscId", oscId);
         obj->setProperty("frames", juce::var(frames));
         webView.emitEventIfBrowserIsVisible("wavetableData", juce::var(obj.release()));
     }
