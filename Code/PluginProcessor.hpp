@@ -8,6 +8,7 @@
 #include "WavetableBuilder.hpp"
 #include "Voice.hpp"
 #include "AnalogOscillator.hpp"
+#include "LicenseVerifier.hpp"
 
 namespace SPECTR {
     static constexpr int kNumVoices = 8;
@@ -74,6 +75,8 @@ namespace SPECTR {
         const WavetableData& getWavetableData() const {
             return mWavetableData;
         }
+
+        LicenseInfo licenseInfo;
 
     private:
         static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();

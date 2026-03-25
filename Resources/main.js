@@ -48,6 +48,19 @@ function roundRect(ctx, x, y, w, h, r) {
     ctx.closePath();
 }
 
+/**
+ * @param {Blob} file
+ * @param {function(string)} result
+ * @returns {string}
+ */
+function readFileToString(file, result) {
+    const r = new FileReader();
+    r.onload = e => {
+        result(e.target.result);
+    }
+    r.readAsText(file);
+}
+
 //===== Bridge: JS → C++ =====//
 function sendToPlugin(paramId, value) {
     if (window.__JUCE__?.backend)
@@ -61,14 +74,27 @@ function setupJUCEListeners() {
 
     document.querySelectorAll("[data-load-wavetable]").forEach((btn) => {
         const oscId = btn.getAttribute("data-load-wavetable");
-        console.log(`OSC ID: ${oscId}`);
         btn.addEventListener("click", () => {
             window.__JUCE__.backend.emitEvent("openFilePicker", {oscId: oscId});
         });
     });
 
+    window.__JUCE__.backend.addEventListener("activateLicense", (data) => {
+        // `data` contains license info
+        if (data.valid) {
+            alert
+            ("Valid license file: " + JSON.stringify(data));
+        } else {
+            alert("License file is not valid");
+        }
+    });
+
+    window.__JUCE__.backend.addEventListener("getLicenseInfo", (data) => {
+        // `data` contains license info
+    });
+
     window.__JUCE__.backend.addEventListener("wavetableData", (data) => {
-        setWavetableFrames(data.oscId, data.frames);
+        setWavetableFrames(data.oscId, data.frames, data.wtName);
     });
 
     window.__JUCE__.backend.addEventListener("wavetablePosition", (data) => {

@@ -27,8 +27,12 @@ namespace SPECTR {
         // Send a normalized value to the JS layer
         void updateUIParam(const juce::String& paramID, f32 normalizedValue);
 
-        void openFilePicker(const juce::String& oscId = "osc1");
-        void sendWavetableToUI(const juce::String& oscId = "osc1");
+        // Called from web view
+        void ipc_OpenFilePicker(const juce::String& oscId = "osc1");
+        void ipc_SendWavetableToUI(const juce::String& wtName, const juce::String& oscId = "osc1");
+        void ipc_ActivateLicense(const juce::String& licenseJson);
+        void ipc_GetLicenseInfo();
+        void ipc_ClearLicense() const;
 
         SPECTRProcessor& audioProcessor;
         std::unique_ptr<juce::FileChooser> mFileChooser;
@@ -51,10 +55,24 @@ namespace SPECTR {
                                            param->setValueNotifyingHost(value);
                                    }
                                })
-            .withEventListener("openFilePicker", [this](const juce::var& data) {
-                auto oscId = data["oscId"].toString();
-                juce::MessageManager::callAsync([this, oscId] { openFilePicker(oscId); });
-            })};
+            .withEventListener("openFilePicker",
+                               [this](const juce::var& data) {
+                                   auto oscId = data["oscId"].toString();
+                                   juce::MessageManager::callAsync([this, oscId] { ipc_OpenFilePicker(oscId); });
+                               })
+            .withEventListener("activateLicense",
+                               [this](const juce::var& data) {
+                                   auto licenseJson = data.toString();
+                                   juce::MessageManager::callAsync(
+                                     [this, licenseJson] { ipc_ActivateLicense(licenseJson); });
+                               })
+            .withEventListener(
+              "getLicenseInfo",
+              [this](const juce::var& data) { juce::MessageManager::callAsync([this] { ipc_GetLicenseInfo(); }); })
+            .withEventListener(
+              "clearLicense",
+              [this](const juce::var& data) { juce::MessageManager::callAsync([this] { ipc_ClearLicense(); }); }),
+        };
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SPECTREditor)
     };

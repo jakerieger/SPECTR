@@ -4,16 +4,40 @@ project(SPECTR VERSION 0.0.1)
 set(CMAKE_CXX_STANDARD 20) # Change this if you want, C++17 and up is recommended
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# -----------------------------------------------------------------------
+# mbedTLS — fetched at configure time, statically linked
+# -----------------------------------------------------------------------
+include(FetchContent)
+
+set(ENABLE_TESTING OFF CACHE BOOL "" FORCE)     # don't build mbedTLS tests
+set(ENABLE_PROGRAMS OFF CACHE BOOL "" FORCE)    # don't build mbedTLS CLI tools
+set(MBEDTLS_FATAL_WARNINGS OFF CACHE BOOL "" FORCE)
+
+FetchContent_Declare(
+        mbedtls
+        GIT_REPOSITORY https://github.com/Mbed-TLS/mbedtls.git
+        GIT_TAG v3.6.2
+        GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(mbedtls)
+
+# -----------------------------------------------------------------------
+# JUCE
+# -----------------------------------------------------------------------
 add_subdirectory(JUCE)
 
 juce_add_binary_data(EmbeddedResources
         SOURCES
-        Resources/index.html
-        Resources/style.css
-        Resources/main.js
-        Resources/knob.js
         Resources/dropdown.js
+        Resources/index.html
+        Resources/knob.js
+        Resources/main.js
+        Resources/pluginSettings.js
+        Resources/public_key.pem
+        Resources/style.css
         Resources/wtDisplay.js
+        Resources/keyboard.js
+        Resources/nodeGraphEditor.js
 
         HEADER_NAME BinaryData.h
         NAMESPACE BinaryData
@@ -42,6 +66,8 @@ juce_add_plugin(SPECTR
 
 target_sources(SPECTR PRIVATE
         Code/AnalogOscillator.hpp
+        Code/LicenseVerifier.cpp
+        Code/LicenseVerifier.hpp
         Code/PluginCommon.hpp
         Code/PluginEditor.cpp
         Code/PluginEditor.hpp
@@ -58,6 +84,7 @@ target_sources(SPECTR PRIVATE
 # Add any JUCE modules your plugin needs here. Un-comment the EmbeddedResources if you're using it.
 target_link_libraries(SPECTR PRIVATE
         EmbeddedResources
+        MbedTLS::mbedcrypto # crypto + PK, no TLS needed
         juce::juce_audio_processors
         juce::juce_audio_utils
         juce::juce_dsp

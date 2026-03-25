@@ -1,19 +1,19 @@
-<!-- Stylesheets -->
 <link rel="stylesheet" href="style.css">
 
-<!-- Scripts -->
 <script src="main.js" defer></script>
 <script src="knob.js" defer></script>
 <script src="dropdown.js" defer></script>
 <script src="wtDisplay.js" defer></script>
+<script src="pluginSettings.js" defer></script>
+<script src="keyboard.js" defer></script>
+<script src="nodeGraphEditor.js" defer></script>
 
-<!-- UI HTML -->
 <div class="synth">
     <div class="synth-header">
         <div style="display:flex;align-items:baseline;gap:12px">
             <div class="synth-name">SPECTR</div>
             <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text-secondary);letter-spacing:3px">
-                MORPH
+                GRAPH
                 SYNTHESIZER
             </div>
         </div>
@@ -60,66 +60,18 @@
             </div>
         </div>
     </div>
-
-    <!-- OSC ROW -->
-    <div class="panel-row row-3 top-row" style="height:270px">
-        <div id="osc-1" class="panel">
-            <div class="panel-header">
-                <div class="radio-button active" id="osc1-enabled-btn"></div>
-                <div class="panel-title">OSC 1</div>
-                <div class="osc-type-dropdown">
-                    <div class="osc-type-dropdown-selected">Wavetable</div>
-                    <div class="osc-type-dropdown-arrow">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>menu-down</title>
-                            <path fill="var(--text-disabled)" d="M7,10L12,15L17,10H7Z"/>
-                        </svg>
-                    </div>
-                    <div class="osc-type-dropdown-menu">
-                        <div class="osc-type-dropdown-item">Analog</div>
-                        <div class="osc-type-dropdown-item">Sample</div>
-                        <div class="osc-type-dropdown-item selected">Wavetable</div>
-                    </div>
-                </div>
-                <div data-load-wavetable="osc1">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Load Wavetable</title>
-                        <path fill="var(--input-border)"
-                              d="M19,20H4C2.89,20 2,19.1 2,18V6C2,4.89 2.89,4 4,4H10L12,6H19A2,2 0 0,1 21,8H21L4,8V18L6.14,10H23.21L20.93,18.5C20.7,19.37 19.92,20 19,20Z"/>
-                    </svg>
-                </div>
-            </div>
-            <div class="osc-display wavetable">
-                <div class="wavetable-menu">
-                    <div data-wavetable-previous="osc1">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>menu-left</title>
-                            <path fill="var(--text-disabled)" d="M14,7L9,12L14,17V7Z"/>
-                        </svg>
-                    </div>
-                    <div data-wavetable-current="osc1">Basic Shapes</div>
-                    <div data-wavetable-next="osc1">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>menu-right</title>
-                            <path fill="var(--text-disabled)" d="M10,17L15,12L10,7V17Z"/>
-                        </svg>
-                    </div>
-                </div>
-                <canvas data-wavetable-display="osc1" height="140"></canvas>
-            </div>
-            <div class="knob-row">
-                <div class="knob-wrap">
-                    <canvas id="knob-frame-pos" class="knob" data-param="framePos" data-value="0.0" width="160"
-                            height="160"></canvas>
-                    <span class="knob-label">Position</span>
-                </div>
-                <div class="knob-wrap">
-                    <canvas id="knob-warp" class="knob" data-param="osc1Warp" data-value="0.0" width="160"
-                            height="160"></canvas>
-                    <span class="knob-label">Warp</span>
-                </div>
-                <div class="knob-wrap">
-                    <canvas id="knob-gain" class="knob" data-param="osc1Level" data-value="0.6" width="160"
-                            height="160"></canvas>
-                    <span class="knob-label">Level</span>
-                </div>
-            </div>
+    <div class="synth-view active" id="node-graph">
+        <canvas id="node-graph-editor"></canvas>
+    </div>
+    <div class="synth-view" id="grid"></div>
+    <div class="synth-footer">
+        <div style="flex:1;">Hint section</div>
+        <div style="width:200px;border-left:1px solid var(--border);padding-left:8px;color:var(--text-disabled);">
+            Latency: 0ms
         </div>
+    </div>
+
+    <div class="synth-keyboard">
+        <canvas id="keyboard"></canvas>
     </div>
 </div>

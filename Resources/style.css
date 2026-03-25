@@ -12,6 +12,7 @@
     --text-secondary: #8b90ad;
     --text-disabled: #515675;
     --primary-accent: #33b7d9;
+    --yellow-accent: #cab138;
 }
 
 * {
@@ -42,7 +43,6 @@ button:active {
 .synth {
     background: var(--display);
     font-family: 'Rajdhani', sans-serif;
-    padding: 4px;
     color: #c8c8c8;
     width: 1200px;
     height: 800px;
@@ -57,11 +57,10 @@ button:active {
     align-items: center;
     justify-content: space-between;
     padding: 20px 20px;
-    border: 1px solid var(--border);
     background: var(--background);
-    border-radius: 4px;
     flex-shrink: 0;
-    margin-bottom: 4px;
+    box-shadow: 0 10px 40px rgba(4, 4, 8, 0.6);
+    z-index: 1;
 }
 
 .synth-name {
@@ -74,7 +73,7 @@ button:active {
 
 .panel-row {
     display: grid;
-    gap: 2px;
+    gap: 4px;
     flex: 1;
     min-height: 0
 }
@@ -428,4 +427,161 @@ canvas.knob {
 
 [data-load-wavetable]:active {
     background: var(--text-disabled);
+}
+
+.modal {
+    transition: 200ms;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -99;
+    background: rgba(0, 0, 0, 0.8);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.0;
+    display: flex;
+    user-select: none;
+}
+
+.modal.visible {
+    opacity: 1.0;
+    z-index: 99;
+}
+
+.modal-panel {
+    background: var(--panel);
+    min-width: 300px;
+    padding: 16px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    color: var(--text-secondary);
+}
+
+.modal-title {
+    font-size: 20pt;
+    color: var(--text-primary);
+}
+
+.modal-subtitle {
+    font-size: 12pt;
+}
+
+#license-dropzone {
+    background: var(--display-secondary);
+    padding-top: 20px;
+    padding-bottom: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    border: 2px dashed var(--border);
+}
+
+#license-dropzone svg {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 16px;
+    fill: var(--yellow-accent);
+}
+
+#license-dropzone div {
+    color: var(--text-secondary);
+}
+
+#license-text-input {
+    background: var(--input);
+    border: 1px solid var(--text-disabled);
+    outline: none;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    color: var(--text-secondary);
+    font-family: 'Share Tech Mono', monospace;
+}
+
+#license-text-input::placeholder {
+    color: var(--text-disabled);
+}
+
+.modal-panel button {
+    height: 36px;
+    border: 1px solid var(--text-disabled);
+    border-radius: 4px;
+    background: var(--input);
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.modal-panel button:disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+}
+
+#activate-license-btn {
+    border: 1px solid #10343e;
+    background: var(--primary-accent);
+    color: black;
+}
+
+.modal-panel a, .modal-panel a:visited {
+    color: var(--text-primary);
+}
+
+.synth-view {
+    display: none;
+    background: var(--display-secondary);
+    min-width: 100%;
+    height: 100%;
+}
+
+.synth-view.active {
+    display: flex;
+}
+
+.synth-footer {
+    background: var(--background);
+    min-width: 100%;
+    z-index: 1;
+    box-shadow: 0 -10px 40px rgba(4, 4, 8, 0.6);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px;
+    color: var(--text-secondary);
+}
+
+.synth-keyboard {
+    position: absolute;
+    bottom: 48px;
+    height: 80px;
+    left: 10px;
+    right: 10px;
+    background: var(--display);
+    z-index: 2;
+    opacity: 0.1;
+    transition: 400ms;
+}
+
+.synth-keyboard:hover {
+    opacity: 0.75;
+}
+
+#keyboard {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#node-graph-editor {
+    display: block;
+    width: 100%;
+    height: 100%;
 }

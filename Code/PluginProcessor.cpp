@@ -34,6 +34,14 @@ namespace SPECTR {
 
         // Init default ADSR
         mAdsrParams = {0.01f, 0.1f, 0.7f, 0.3f};
+
+        // Get license info
+        licenseInfo = LicenseVerifier::loadSavedLicense();
+        if (licenseInfo.isValid) {
+            DBG("License OK");
+        } else {
+            DBG("No valid license found");
+        }
     }
 
     SPECTRProcessor::~SPECTRProcessor() {

@@ -27,11 +27,20 @@ function getOrCreateDisplay(oscId) {
 }
 
 // Called by JUCE bridge when frame data arrives
-function setWavetableFrames(oscId, frames) {
+function setWavetableFrames(oscId, frames, wtName) {
     const display = getOrCreateDisplay(oscId);
     if (!display) return;
     display.frames = frames;
     drawWavetable(oscId);
+
+    // Update current wavetable label
+    /**
+     * @type {HTMLDivElement}
+     */
+    const current = document.querySelector(`[data-wavetable-current="${oscId}"]`);
+    if (current) {
+        current.innerText = wtName;
+    }
 }
 
 // Called by JUCE bridge when the position knob moves

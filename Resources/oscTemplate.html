@@ -1,0 +1,82 @@
+<!-- OSC ROW -->
+<div class="panel-row row-3 top-row" style="height:270px">
+    <div id="osc-1" class="panel">
+        <div class="panel-header">
+            <div class="radio-button active" id="osc1-enabled-btn"></div>
+            <div class="panel-title">OSC 1</div>
+            <div class="osc-type-dropdown">
+                <div class="osc-type-dropdown-selected">Wavetable</div>
+                <div class="osc-type-dropdown-arrow">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>menu-down</title>
+                        <path fill="var(--text-disabled)" d="M7,10L12,15L17,10H7Z"/>
+                    </svg>
+                </div>
+                <div class="osc-type-dropdown-menu">
+                    <div class="osc-type-dropdown-item">Analog</div>
+                    <div class="osc-type-dropdown-item">Sample</div>
+                    <div class="osc-type-dropdown-item selected">Wavetable</div>
+                </div>
+            </div>
+            <div data-load-wavetable="osc1">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Load Wavetable</title>
+                    <path fill="var(--input-border)"
+                          d="M19,20H4C2.89,20 2,19.1 2,18V6C2,4.89 2.89,4 4,4H10L12,6H19A2,2 0 0,1 21,8H21L4,8V18L6.14,10H23.21L20.93,18.5C20.7,19.37 19.92,20 19,20Z"/>
+                </svg>
+            </div>
+        </div>
+        <div class="osc-display wavetable">
+            <div class="wavetable-menu">
+                <div data-wavetable-previous="osc1">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>menu-left</title>
+                        <path fill="var(--text-disabled)" d="M14,7L9,12L14,17V7Z"/>
+                    </svg>
+                </div>
+                <div data-wavetable-current="osc1">---</div>
+                <div data-wavetable-next="osc1">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>menu-right</title>
+                        <path fill="var(--text-disabled)" d="M10,17L15,12L10,7V17Z"/>
+                    </svg>
+                </div>
+            </div>
+            <canvas data-wavetable-display="osc1" height="140"></canvas>
+        </div>
+        <div class="knob-row">
+            <div class="knob-wrap">
+                <canvas id="knob-frame-pos" class="knob" data-param="framePos" data-value="0.0" width="160"
+                        height="160"></canvas>
+                <span class="knob-label">Position</span>
+            </div>
+            <div class="knob-wrap">
+                <canvas id="knob-warp" class="knob" data-param="osc1Warp" data-value="0.0" width="160"
+                        height="160"></canvas>
+                <span class="knob-label">Warp</span>
+            </div>
+            <div class="knob-wrap">
+                <canvas id="knob-gain" class="knob" data-param="osc1Level" data-value="0.6" width="160"
+                        height="160"></canvas>
+                <span class="knob-label">Level</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="activation-modal">
+    <div class="modal-panel">
+        <div class="modal-title">Activate <strong>SPECTR</strong></div>
+        <div class="modal-subtitle" style="margin-bottom: 20px">Drop your .license file below, or paste the contents
+            manually.
+        </div>
+        <div id="license-dropzone" data-dropzone-license-file="">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>key-variant</title>
+                <path d="M22,18V22H18V19H15V16H12L9.74,13.74C9.19,13.91 8.61,14 8,14A6,6 0 0,1 2,8A6,6 0 0,1 8,2A6,6 0 0,1 14,8C14,8.61 13.91,9.19 13.74,9.74L22,18M7,5A2,2 0 0,0 5,7A2,2 0 0,0 7,9A2,2 0 0,0 9,7A2,2 0 0,0 7,5Z"/>
+            </svg>
+            <div>Drop license file here</div>
+            <div>or <a href="" id="license-browse-btn">browse for file</a></div>
+            <input id="license-file-input" type="file" accept=".license,.json" style="display:none">
+        </div>
+        <div class="modal-subtitle" style="margin-top: 20px; margin-bottom: 20px;">or paste manually</div>
+        <textarea id="license-text-input" rows="5" placeholder='{"payload":"...","signature":"..."}'></textarea>
+        <button id="activate-license-btn" disabled style="margin-bottom: 8px">Activate</button>
+        <button id="continue-evaluating-btn">Continue evaluating (7 days remaining)</button>
+    </div>
+</div>
